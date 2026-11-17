@@ -1,0 +1,2543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>La Búsqueda del Saber — Edición Premium de Cierre Lectivo | Instituto FEB</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at top, #153136 0%, #0b191d 58%, #060e11 100%);
+      color: #f8f5ee;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .font-serif-title {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+    .glass-card {
+      background: rgba(17, 37, 42, 0.84);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(229, 184, 75, 0.3);
+      box-shadow: 0 22px 55px rgba(0, 0, 0, 0.5);
+    }
+    .char-card {
+      transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+    .char-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(245, 196, 81, 0.78);
+      box-shadow: 0 14px 32px rgba(245, 196, 81, 0.18);
+    }
+    .char-card.selected {
+      border-color: #f5c451;
+      background: rgba(26, 56, 62, 0.94);
+      box-shadow: 0 0 0 2px rgba(245, 196, 81, 0.5), 0 16px 38px rgba(245, 196, 81, 0.22);
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #f3ca62 0%, #c89128 100%);
+      color: #091518;
+      font-weight: 700;
+      transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-gold:hover:not(:disabled) {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(229, 184, 75, 0.3);
+    }
+    .btn-gold:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .option-btn {
+      transition: all 0.18s ease;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: rgba(245, 196, 81, 0.65);
+      background: rgba(245, 196, 81, 0.12);
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.95) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .animate-pop {
+      animation: popIn 0.32s ease-out forwards;
+    }
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 60;
+    }
+    #game-canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 10;
+      border-radius: 1rem;
+      cursor: pointer;
+      touch-action: none;
+      user-select: none;
+      background: #0d1f23;
+    }
+    .dpad-btn {
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    .dpad-btn:active {
+      transform: scale(0.93);
+      background: rgba(245, 196, 81, 0.3);
+    }
+    /* Native modal dialog rules per modern-web-guidance */
+    dialog:modal {
+      overscroll-behavior: contain;
+      max-width: 44rem;
+      width: calc(100% - 1.5rem);
+      border-radius: 1.5rem;
+      padding: 0;
+      background: #102429;
+      color: #f8f5ee;
+      border: 2px solid rgba(245, 196, 81, 0.58);
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8);
+    }
+    dialog::backdrop {
+      overflow: hidden;
+      overscroll-behavior: contain;
+      background: rgba(4, 10, 12, 0.8);
+      backdrop-filter: blur(6px);
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-amber-400/30">
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="max-w-5xl mx-auto px-3 sm:px-5 py-4 sm:py-6 relative z-10">
+    <!-- Top Header -->
+    <header class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400/25 to-teal-900/50 border border-amber-400/50 flex items-center justify-center text-xl shadow-md">
+          🏛️
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <p class="text-xs uppercase tracking-widest text-amber-300 font-semibold">Instituto FEB · Bibliotecología</p>
+            <span class="hidden sm:inline-block px-2 py-0.5 rounded-full bg-amber-400/15 border border-amber-400/35 text-[10px] font-bold text-amber-200 uppercase">Edición Cierre Lectivo</span>
+          </div>
+          <h1 class="font-serif-title text-lg sm:text-2xl text-amber-50 font-bold leading-tight">La Búsqueda del Saber</h1>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <button id="music-toggle" type="button" class="px-3 py-2 rounded-xl bg-teal-950/85 border border-amber-300/30 text-xs font-medium text-amber-100 hover:border-amber-300/65 transition flex items-center gap-1.5" title="Activar o pausar música ambiental de la biblioteca">
+          <span id="music-icon">🎵</span>
+          <span id="music-label">Música</span>
+        </button>
+        <button id="sound-toggle" type="button" class="px-3 py-2 rounded-xl bg-teal-950/85 border border-amber-300/30 text-xs font-medium text-amber-100 hover:border-amber-300/65 transition flex items-center gap-1.5" title="Activar o silenciar efectos de sonido">
+          <span id="sound-icon">🔊</span>
+          <span id="sound-label">Efectos</span>
+        </button>
+        <button id="view-grades-top" type="button" class="hidden px-3 py-2 rounded-xl bg-amber-400/20 border border-amber-400/50 text-xs font-bold text-amber-200 hover:bg-amber-400/30 transition">
+          📜 Ver Acta Final
+        </button>
+        <button id="restart-top" type="button" class="hidden px-3 py-2 rounded-xl bg-teal-950/85 border border-amber-300/30 text-xs font-medium text-amber-100 hover:border-amber-300/65 transition">
+          ↺ Cambiar personaje
+        </button>
+      </div>
+    </header>
+
+    <!-- SCREEN 1: Character Selection -->
+    <section id="screen-select" class="glass-card rounded-3xl p-5 sm:p-8 animate-pop">
+      <div class="text-center max-w-2xl mx-auto mb-6">
+        <span class="inline-block px-3.5 py-1 rounded-full bg-amber-400/15 border border-amber-400/35 text-amber-300 text-xs font-semibold tracking-wide mb-3">
+          ✨ Cierre de Ciclo Lectivo · Bibliotecario de Instituciones Educativas ✨
+        </span>
+        <h2 class="font-serif-title text-2xl sm:text-4xl font-bold text-amber-50 mb-2">
+          Elegí tu personaje y explorá la Gran Biblioteca
+        </h2>
+        <p class="text-sm sm:text-base text-teal-100/85 leading-relaxed">
+          Recorré los pasillos iluminados de nuestra biblioteca, saludá al <strong>Claustro Docente</strong>, superá las <strong>3 estaciones del saber</strong> y abrí el <strong>Cofre del Acta Final</strong> para descubrir tus calificaciones.
+        </p>
+      </div>
+
+      <div class="max-w-md mx-auto mb-6">
+        <label for="student-name" class="block text-xs font-semibold uppercase tracking-wider text-amber-200/90 mb-1.5">
+          Tu nombre y apellido (para tu Diploma de Honor)
+        </label>
+        <input
+          id="student-name"
+          type="text"
+          maxlength="60"
+          placeholder="Ej. María Gómez"
+          class="w-full px-4 py-3 rounded-xl bg-teal-950/90 border border-teal-700/80 text-amber-50 placeholder-teal-400/50 focus:outline-none focus:border-amber-400 transition text-sm shadow-inner"
+        />
+      </div>
+
+      <div id="character-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Professors Welcome Banner on Screen 1 -->
+      <div class="rounded-2xl bg-teal-950/70 border border-amber-400/25 p-3.5 sm:p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">🎓</span>
+          <div>
+            <p class="text-xs uppercase tracking-wider text-amber-300 font-bold">Equipo Docente que te acompaña en la Biblioteca</p>
+            <p class="text-xs sm:text-sm text-teal-100/90 font-medium">
+              Nastasi, Mariana · Moriondo, Silvia · Ruiz Chaves, Eduardo · Coria, Emiliano
+            </p>
+          </div>
+        </div>
+        <span class="text-xs text-amber-200/80 italic shrink-0">¡Visitanos en el atrio central del mapa!</span>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-teal-800/60">
+        <p id="selected-hint" class="text-sm text-teal-200/85">
+          Seleccioná uno de los tres guardianes para entrar a la biblioteca.
+        </p>
+        <button id="start-btn" type="button" disabled class="btn-gold w-full sm:w-auto px-8 py-3.5 rounded-xl text-sm shadow-lg">
+          🎮 Entrar a la Gran Biblioteca →
+        </button>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: 2D Top-Down RPG World -->
+    <section id="screen-world" class="hidden animate-pop">
+      <!-- Top HUD bar -->
+      <div class="glass-card rounded-2xl p-3 sm:p-4 mb-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <img id="hud-avatar" src="" alt="Personaje" class="w-11 h-11 rounded-full object-cover border-2 border-amber-400 shadow-md" />
+            <span id="hud-power-dot" class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-400 text-teal-950 text-[11px] font-bold flex items-center justify-center shadow">⚡</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <p id="hud-name" class="text-sm font-bold text-amber-50 leading-tight"></p>
+              <span id="hud-perk-badge" class="hidden sm:inline-block px-2 py-0.5 rounded-md bg-amber-400/15 border border-amber-400/30 text-[10px] font-semibold text-amber-200"></span>
+            </div>
+            <p id="hud-mission" class="text-xs text-amber-300/90">Acercate a las 3 estaciones brillantes o al Claustro Docente</p>
+          </div>
+        </div>
+
+        <!-- Seals badges + Bonus books + Easter Eggs counter -->
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <div id="badge-tecnologias" class="px-2.5 py-1 rounded-lg text-xs font-semibold border bg-teal-950/80 border-teal-700/70 text-teal-300/60 flex items-center gap-1" title="Tecnologías aplicadas a las bibliotecas">
+            <span>⚙️</span> <span class="hidden md:inline">Tecnologías</span>
+          </div>
+          <div id="badge-comunicacion" class="px-2.5 py-1 rounded-lg text-xs font-semibold border bg-teal-950/80 border-teal-700/70 text-teal-300/60 flex items-center gap-1" title="Comunicación y cibercultura">
+            <span>🌐</span> <span class="hidden md:inline">Cibercultura</span>
+          </div>
+          <div id="badge-formacion" class="px-2.5 py-1 rounded-lg text-xs font-semibold border bg-teal-950/80 border-teal-700/70 text-teal-300/60 flex items-center gap-1" title="Formación de usuarios">
+            <span>🗝️</span> <span class="hidden md:inline">Formación</span>
+          </div>
+          <div id="badge-stars" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-400/15 border border-amber-400/40 text-amber-200 flex items-center gap-1" title="Códices Dorados recolectados en los pasillos">
+            <span>📖</span> <span id="hud-stars">0/5</span>
+          </div>
+          <div id="badge-eggs" class="hidden px-2.5 py-1 rounded-lg text-xs font-bold bg-fuchsia-500/20 border border-fuchsia-400/50 text-fuchsia-200 flex items-center gap-1" title="Easter Eggs y Secretos de la Biblioteca descubiertos">
+            <span>🕵️</span> <span id="hud-eggs">0/4 Secretos</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Wrapper -->
+      <div class="relative glass-card rounded-2xl p-2 sm:p-3 mb-3">
+        <!-- Mini-game active HUD banner -->
+        <div id="arcade-banner" class="hidden absolute top-5 left-1/2 -translate-x-1/2 z-20 px-5 py-2 rounded-full bg-fuchsia-950/95 border-2 border-amber-300 text-amber-100 text-xs sm:text-sm font-bold shadow-2xl flex items-center gap-3">
+          <span>🕹️ ¡LLUVIA DE INCUNABLES!</span>
+          <span id="arcade-timer" class="text-amber-300">⏱️ 20s</span>
+          <span id="arcade-score" class="text-emerald-300">📚 0 atrapados</span>
+        </div>
+
+        <canvas id="game-canvas" width="960" height="600"></canvas>
+
+        <!-- Contextual Action Button floating over bottom-center of canvas -->
+        <div id="interact-prompt" class="hidden absolute bottom-5 left-1/2 -translate-x-1/2 z-20">
+          <button id="interact-btn" type="button" class="btn-gold px-5 py-2.5 rounded-full text-xs sm:text-sm shadow-2xl border-2 border-amber-100 flex items-center gap-2 animate-bounce">
+            <span id="interact-icon">✨</span>
+            <span id="interact-text">Interactuar (Espacio / Clic)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Controls Bar (Desktop instructions + Mobile / Touch D-Pad + Boost) -->
+      <div class="glass-card rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-xs sm:text-sm text-teal-100/85 space-y-1 text-center sm:text-left">
+          <p>
+            <strong class="text-amber-300">🕹️ Controles:</strong> Movete con <strong>Flechas / WASD</strong> o <strong>haciendo clic en cualquier punto del mapa</strong>. Presioná <strong>Espacio</strong> para interactuar y <strong>Shift</strong> para tu <em>Impulso Mágico</em>.
+          </p>
+          <p id="controls-subtip" class="text-xs text-teal-300/80">
+            🎓 <em>Tip: Visitá el <strong>Claustro Docente</strong>, juntá los 5 Códices Dorados (📖) y tocá las estanterías o lámparas para descubrir curiosidades.</em>
+          </p>
+        </div>
+
+        <!-- On-screen directional pad + Action & Boost buttons -->
+        <div class="flex items-center gap-2.5 shrink-0">
+          <div class="grid grid-cols-3 gap-1.5 w-28 sm:w-32">
+            <div></div>
+            <button type="button" data-dir="up" class="dpad-btn h-9 rounded-lg bg-teal-900/90 border border-amber-300/35 text-amber-100 font-bold flex items-center justify-center">▲</button>
+            <div></div>
+            <button type="button" data-dir="left" class="dpad-btn h-9 rounded-lg bg-teal-900/90 border border-amber-300/35 text-amber-100 font-bold flex items-center justify-center">◀</button>
+            <button type="button" data-dir="down" class="dpad-btn h-9 rounded-lg bg-teal-900/90 border border-amber-300/35 text-amber-100 font-bold flex items-center justify-center">▼</button>
+            <button type="button" data-dir="right" class="dpad-btn h-9 rounded-lg bg-teal-900/90 border border-amber-300/35 text-amber-100 font-bold flex items-center justify-center">▶</button>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <button id="mobile-action-btn" type="button" class="btn-gold h-9 px-3.5 rounded-xl text-xs font-extrabold shadow-md flex items-center justify-center gap-1">
+              <span>⚡</span> <span>Acción</span>
+            </button>
+            <button id="mobile-boost-btn" type="button" class="px-3.5 h-9 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 border border-amber-400/50 text-amber-200 text-xs font-bold flex items-center justify-center gap-1 transition">
+              <span>🚀</span> <span>Impulso</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: Final Grades, Dedication & Luxury Diploma -->
+    <section id="screen-finale" class="hidden glass-card rounded-3xl p-5 sm:p-8 animate-pop">
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center p-1.5 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-200 to-emerald-400 mb-3 shadow-xl">
+          <img id="finale-avatar" src="" alt="Personaje ganador" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-2 border-teal-950" />
+        </div>
+        <div class="flex flex-wrap items-center justify-center gap-2 mb-2">
+          <span class="px-3 py-1 rounded-full bg-emerald-400/15 border border-emerald-400/40 text-emerald-300 text-xs font-bold uppercase tracking-wider">
+            🏆 ¡Cofre del Saber Abierto! · 3 Sellos Obtenidos
+          </span>
+          <span id="finale-codex-badge" class="px-3 py-1 rounded-full bg-amber-400/20 border border-amber-400/45 text-amber-200 text-xs font-bold"></span>
+        </div>
+        <h2 class="font-serif-title text-2xl sm:text-4xl font-bold text-amber-50 mb-1.5">
+          Acta de Calificaciones Finales
+        </h2>
+        <p id="finale-student-line" class="text-sm sm:text-base text-amber-200/95 font-medium"></p>
+      </div>
+
+      <!-- 3 Subject Grade Cards -->
+      <div id="grades-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Special End-of-Year Dedication from the 4 Professors -->
+      <div class="rounded-2xl bg-gradient-to-br from-teal-950/90 via-teal-900/60 to-amber-950/30 border border-amber-400/40 p-5 sm:p-6 mb-5 shadow-inner">
+        <div class="flex items-center justify-center gap-2 mb-2">
+          <span class="text-lg">✨</span>
+          <h3 class="font-serif-title text-lg sm:text-xl font-bold text-amber-200 text-center">
+            Dedicatoria de Cierre de Ciclo Lectivo
+          </h3>
+          <span class="text-lg">✨</span>
+        </div>
+        <p class="text-sm sm:text-base text-teal-50/95 leading-relaxed text-center max-w-3xl mx-auto mb-5 italic">
+          "Cada biblioteca escolar cobra vida gracias a quienes saben organizar el conocimiento, tender puentes en la cultura digital y formar lectores críticos y autónomos. Gracias por la pasión, el compromiso y la calidez que compartieron en cada encuentro. ¡Les deseamos un camino profesional brillante!"
+        </p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-amber-400/25 text-center">
+          <div class="p-2 rounded-xl bg-teal-950/60 border border-teal-800/80">
+            <p class="font-serif-title text-sm font-bold text-amber-100">Nastasi, Mariana</p>
+            <p class="text-[11px] text-amber-300/80">Equipo Docente FEB</p>
+          </div>
+          <div class="p-2 rounded-xl bg-teal-950/60 border border-teal-800/80">
+            <p class="font-serif-title text-sm font-bold text-amber-100">Moriondo, Silvia</p>
+            <p class="text-[11px] text-amber-300/80">Equipo Docente FEB</p>
+          </div>
+          <div class="p-2 rounded-xl bg-teal-950/60 border border-teal-800/80">
+            <p class="font-serif-title text-sm font-bold text-amber-100">Ruiz Chaves, Eduardo</p>
+            <p class="text-[11px] text-amber-300/80">Equipo Docente FEB</p>
+          </div>
+          <div class="p-2 rounded-xl bg-teal-950/60 border border-teal-800/80">
+            <p class="font-serif-title text-sm font-bold text-amber-100">Coria, Emiliano</p>
+            <p class="text-[11px] text-amber-300/80">Equipo Docente FEB</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Post-Game Easter Eggs Callout Banner -->
+      <div class="rounded-2xl bg-fuchsia-950/40 border border-fuchsia-400/40 p-4 mb-6 text-center">
+        <p class="text-xs sm:text-sm text-fuchsia-100 font-medium">
+          🕵️ <strong>¡Modo Post-Créditos Desbloqueado!</strong> Si volvés a la biblioteca ahora, aparecieron <strong>4 Easter Eggs ocultos</strong>: conocé a <em>Dewey (el michi bibliotecario 🐱)</em>, tomá unos mates en el <em>Rincón del Mate FEB 🧉</em>, descubrí citas secretas en los estantes y jugá al <em>Mini-Juego Arcade de Libros Voladores 🕹️</em>.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        <button id="download-diploma-btn" type="button" class="btn-gold px-7 py-3.5 rounded-xl text-sm shadow-xl flex items-center gap-2">
+          <span>📜</span> Descargar Diploma de Honor (PNG)
+        </button>
+        <button id="back-to-map-btn" type="button" class="px-6 py-3.5 rounded-xl bg-fuchsia-900/80 hover:bg-fuchsia-800 border border-fuchsia-300/50 text-fuchsia-100 text-sm font-bold transition shadow-lg flex items-center gap-2">
+          <span>🕵️</span> Explorar Easter Eggs y Jugar Más
+        </button>
+        <button id="play-again-btn" type="button" class="px-5 py-3.5 rounded-xl bg-teal-950/85 hover:bg-teal-900 border border-teal-700 text-teal-200 text-sm font-semibold transition">
+          ↺ Reiniciar de cero
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Native Modal Dialog for Station Challenges, Claustro Docente & Easter Eggs -->
+  <dialog id="challenge-dialog" aria-labelledby="dialog-station-title">
+    <div class="p-5 sm:p-7">
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <div>
+          <span id="dialog-station-badge" class="inline-block px-3 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-xs font-semibold mb-1.5"></span>
+          <h2 id="dialog-station-title" class="font-serif-title text-xl sm:text-2xl font-bold text-amber-50"></h2>
+        </div>
+        <button id="dialog-close-btn" type="button" class="px-3 py-1.5 rounded-xl bg-teal-950 border border-teal-700 text-xs font-semibold text-teal-200 hover:border-amber-300/50 shrink-0" aria-label="Cerrar ventana y volver al mapa">
+          ✕ Volver al mapa
+        </button>
+      </div>
+      <div id="dialog-station-body"></div>
+    </div>
+  </dialog>
+
+  <!-- Toast feedback -->
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[70] hidden px-5 py-3 rounded-2xl shadow-2xl text-sm font-semibold border transition-all"></div>
+
+  <script>
+    const DOCENTES = [
+      {
+        name: 'Nastasi, Mariana',
+        role: 'Docente de la Cátedra',
+        quote: '«Catalogar y organizar el saber es abrir puertas para que cada estudiante encuentre su propio camino lector. ¡Felicitaciones por este gran logro!»'
+      },
+      {
+        name: 'Moriondo, Silvia',
+        role: 'Docente de la Cátedra',
+        quote: '«La biblioteca escolar es el corazón vivo de la comunidad educativa. Gracias por formarse con tanta dedicación, sensibilidad y compromiso.»'
+      },
+      {
+        name: 'Ruiz Chaves, Eduardo',
+        role: 'Docente de la Cátedra',
+        quote: '«En tiempos de cibercultura, su rol como mediadores críticos y creativos hace toda la diferencia. ¡Un orgullo compartir este ciclo lectivo!»'
+      },
+      {
+        name: 'Coria, Emiliano',
+        role: 'Docente de la Cátedra',
+        quote: '«La tecnología y la formación de usuarios cobran verdadero sentido cuando están al servicio del encuentro humano. ¡Éxitos colegas!»'
+      }
+    ];
+
+    const CHARACTERS = [
+      {
+        id: 'bibliotecario',
+        name: 'El Bibliotecario',
+        subtitle: 'Custodio del Catálogo',
+        perkName: '🧭 Radar de Códices',
+        perkDesc: 'Muestra una brújula dorada hacia el Códice más cercano en el mapa.',
+        desc: 'Preciso, atento a cada metadato y siempre listo para conectar lectores con el libro exacto.',
+        color: '#38bdf8',
+        cloak: '#0284c7',
+        baseSpeed: 4.1,
+        magnetRadius: 38,
+        avatar: 'images/watermarked_img_12613231308639437732.jpg'
+      },
+      {
+        id: 'bibliotecaria',
+        name: 'La Bibliotecaria',
+        subtitle: 'Arquitecta de Lecturas',
+        perkName: '✨ Aura Mediadora',
+        perkDesc: 'Atrae magnéticamente los Códices Dorados desde mayor distancia al caminar.',
+        desc: 'Creativa, mediadora cultural y guía experta en entornos digitales y comunidades educativas.',
+        color: '#f472b6',
+        cloak: '#db2777',
+        baseSpeed: 4.2,
+        magnetRadius: 78,
+        avatar: 'images/watermarked_img_9717482375675140190.jpg'
+      },
+      {
+        id: 'buho',
+        name: 'El Búho de Atenea',
+        subtitle: 'Guía Mitológico del Saber',
+        perkName: '🪶 Vuelo Ágil',
+        perkDesc: 'Desplazamiento más veloz por los pasillos y estela de plumas doradas.',
+        desc: 'Emblema clásico de la sabiduría y las bibliotecas; ve con claridad entre pergaminos y pantallas.',
+        color: '#fbbf24',
+        cloak: '#d97706',
+        baseSpeed: 4.85,
+        magnetRadius: 44,
+        avatar: 'images/watermarked_img_14170771820200785375.jpg'
+      }
+    ];
+
+    const SUBJECTS = [
+      {
+        id: 'tecnologias',
+        name: 'Tecnologías aplicadas a las bibliotecas',
+        shortTitle: 'Estación Koha & OPAC',
+        icon: '⚙️',
+        color: '#38bdf8',
+        grade: 10,
+        gradeText: 'Diez',
+        seal: '⚙️ Sello Tecnológico'
+      },
+      {
+        id: 'comunicacion',
+        name: 'Comunicación y cibercultura',
+        shortTitle: 'Ágora de Cibercultura',
+        icon: '🌐',
+        color: '#a78bfa',
+        grade: 10,
+        gradeText: 'Diez',
+        seal: '🌐 Sello Digital'
+      },
+      {
+        id: 'formacion',
+        name: 'Formación de usuarios',
+        shortTitle: 'Mesa de Referencia',
+        icon: '🗝️',
+        color: '#34d399',
+        grade: 10,
+        gradeText: 'Diez',
+        seal: '🗝️ Sello de Autonomía'
+      }
+    ];
+
+    // Preload character avatar images for Canvas & Diploma rendering
+    const avatarImages = {};
+    CHARACTERS.forEach(ch => {
+      const img = new Image();
+      img.src = ch.avatar;
+      avatarImages[ch.id] = img;
+    });
+
+    // Game State
+    let state = {
+      selectedCharId: null,
+      studentName: '',
+      soundEnabled: true,
+      musicEnabled: true,
+      completedStations: [], // ['tecnologias', 'comunicacion', 'formacion']
+      visitedClaustro: false,
+      postGameUnlocked: false,
+      discoveredEggs: [], // ['michi', 'mate', 'arcade', 'estante']
+      mateTurboActive: false,
+      violetLamps: false,
+      deweyQuoteIdx: 0,
+      mateQuoteIdx: 0,
+      bestArcadeScore: 0,
+      arcade: {
+        active: false,
+        framesLeft: 0,
+        score: 0,
+        books: []
+      },
+      chestOpeningCinematic: false,
+      chestCinematicTimer: 0,
+      activeStationId: null,
+      // Challenge 1 sub-state
+      c1SelectedTerm: null,
+      c1Matched: [],
+      // Challenge 2 sub-state
+      c2Index: 0,
+      // Challenge 3 sub-state
+      c3Picked: [],
+      // World & Player state
+      player: {
+        x: 480,
+        y: 525,
+        radius: 22,
+        speed: 4.2,
+        boostTimer: 0,
+        targetX: null,
+        targetY: null,
+        targetStation: null,
+        walkFrame: 0,
+        facing: 'up',
+        moving: false
+      },
+      // Dewey the Library Cat state
+      cat: {
+        x: 480,
+        y: 255,
+        vx: 0.55,
+        vy: 0.25,
+        pauseTimer: 0
+      },
+      keys: {
+        up: false,
+        down: false,
+        left: false,
+        right: false
+      },
+      particles: [],
+      fireflies: [],
+      floatingTexts: [],
+      starsCollected: 0
+    };
+
+    const WORLD_W = 960;
+    const WORLD_H = 600;
+
+    // Obstacles (Bookshelves with Literary Easter Eggs, Reading Tables with toggleable lamps)
+    const OBSTACLES = [
+      { x: 0, y: 0, w: 330, h: 52, type: 'wall', label: 'Archivo Histórico FEB' },
+      { x: 630, y: 0, w: 330, h: 52, type: 'wall', label: 'Hemeroteca & Sala Silenciosa' },
+      {
+        x: 55, y: 92, w: 170, h: 42, type: 'shelf', label: 'CDD 000 · Bibliotecología',
+        secretQuote: '📚 Secreto de Ranganathan: «1) Los libros son para usarse. 2) A cada lector su libro. 3) A cada libro su lector. 4) Ahorrar tiempo al lector. 5) La biblioteca es un organismo en crecimiento.»'
+      },
+      {
+        x: 55, y: 318, w: 170, h: 42, type: 'shelf', label: 'CDD 370 · Educación',
+        secretQuote: '✨ Secreto Pedagógico: Encontraste un señalador firmado por Mariana, Silvia, Eduardo y Emiliano: «¡Nunca dejes de despertar la curiosidad en tu escuela!»'
+      },
+      {
+        x: 735, y: 92, w: 170, h: 42, type: 'shelf', label: 'CDD 800 · Literatura',
+        secretQuote: '🏛️ Cita Oculta de Jorge Luis Borges: «Siempre imaginé que el Paraíso sería algún tipo de biblioteca.»'
+      },
+      {
+        x: 735, y: 318, w: 170, h: 42, type: 'shelf', label: 'Cultura & Medios Digitales',
+        secretQuote: '🌐 Manifiesto Cibercultural: «Un buen bibliotecario no le teme al algoritmo: enseña a navegar con brújula propia.»'
+      },
+      { x: 300, y: 195, w: 92, h: 52, type: 'table' },
+      { x: 568, y: 195, w: 92, h: 52, type: 'table' }
+    ];
+
+    // Base Interactive Stations
+    const STATIONS = [
+      {
+        id: 'tecnologias',
+        name: 'Tecnologías aplicadas a las bibliotecas',
+        shortTitle: 'Terminal Koha / OPAC',
+        subtitle: 'Ala Oeste · Catalogación',
+        icon: '⚙️',
+        x: 140,
+        y: 222,
+        radius: 40,
+        interactDist: 76,
+        color: '#38bdf8'
+      },
+      {
+        id: 'comunicacion',
+        name: 'Comunicación y cibercultura',
+        shortTitle: 'Foro de Cibercultura',
+        subtitle: 'Ala Este · Redes y Mediación',
+        icon: '🌐',
+        x: 820,
+        y: 222,
+        radius: 40,
+        interactDist: 76,
+        color: '#a78bfa'
+      },
+      {
+        id: 'formacion',
+        name: 'Formación de usuarios',
+        shortTitle: 'Mesa de Referencia',
+        subtitle: 'Sector Sur · Autonomía Lectora',
+        icon: '🗝️',
+        x: 230,
+        y: 470,
+        radius: 40,
+        interactDist: 76,
+        color: '#34d399'
+      },
+      {
+        id: 'claustro',
+        name: 'Claustro Docente · Dedicatoria',
+        shortTitle: 'Claustro Docente FEB',
+        subtitle: 'Libro de Oro · Profesores',
+        icon: '🎓',
+        x: 730,
+        y: 470,
+        radius: 40,
+        interactDist: 78,
+        color: '#f472b6'
+      },
+      {
+        id: 'cofre',
+        name: 'Cofre del Acta Final',
+        shortTitle: 'Cofre de Notas Finales',
+        subtitle: 'Altar Mayor del Saber',
+        icon: '🏆',
+        x: 480,
+        y: 102,
+        radius: 46,
+        interactDist: 84,
+        color: '#f5c451'
+      }
+    ];
+
+    // Post-Game Easter Egg Stations (appear when postGameUnlocked is true)
+    const POSTGAME_STATIONS = [
+      {
+        id: 'mate',
+        name: 'Rincón Secreto del Mate FEB',
+        shortTitle: 'Rincón del Mate 🧉',
+        subtitle: 'Easter Egg · Super Turbo',
+        icon: '🧉',
+        x: 92,
+        y: 520,
+        radius: 34,
+        interactDist: 72,
+        color: '#10b981'
+      },
+      {
+        id: 'arcade',
+        name: 'Mini-Juego Arcade: Lluvia de Incunables',
+        shortTitle: 'Arcade: Libros Voladores',
+        subtitle: 'Easter Egg · Mini-Juego',
+        icon: '🕹️',
+        x: 868,
+        y: 520,
+        radius: 34,
+        interactDist: 72,
+        color: '#e879f9'
+      }
+    ];
+
+    const DEWEY_QUOTES = [
+      '🐱 Dewey dice: «Miau... Me llamo Melvil Dewey Jr. y clasifiqué tu cursada bajo el código 999.9: ¡Perfección Bibliotecaria!»',
+      '🐱 Dewey ronronea: «¿Sabías que en el Antiguo Egipto los gatos custodiaban los rollos de papiro contra los ratones? ¡Yo custodio tus tres 10!»',
+      '🐱 Dewey bosteza: «La 6.ª Ley secreta de la Bibliotecología dice: "Todo bibliotecario merece un buen descanso después de aprobar con 10".»',
+      '🐱 Dewey te guiña un ojo: «Si tocás las lámparas verdes de las mesas de lectura, cambian a luz mística violeta. ¡Probalo!»'
+    ];
+
+    const MATE_QUOTES = [
+      '🧉 ¡Tomaste un mate cebado a 80°C exactos! Activaste el «Modo Super Mate Turbo» (velocidad extra y estela arcoíris).',
+      '🧉 Sabiduría Matera FEB: «No hay catálogo rebelde ni código MARC 21 que resista unos buenos mates entre colegas.»',
+      '🧉 Anécdota de Bibliotecario: «Efecto secundario de esta carrera: ir a cualquier librería o casa ajena y sentir el impulso irrefrenable de ordenarles los estantes.»'
+    ];
+
+    // 5 Collectible Golden Codices
+    let COLLECTIBLES = [];
+    function initCollectibles() {
+      COLLECTIBLES = [
+        { id: 1, x: 140, y: 460, collected: false, label: '¡Códice de Alejandría!' },
+        { id: 2, x: 855, y: 395, collected: false, label: '¡Ex Libris de Oro!' },
+        { id: 3, x: 346, y: 130, collected: false, label: '¡Metadato Maestro!' },
+        { id: 4, x: 614, y: 130, collected: false, label: '¡Red de Saberes!' },
+        { id: 5, x: 480, y: 325, collected: false, label: '¡Estrella Bibliotecaria!' }
+      ];
+    }
+
+    function initFireflies() {
+      state.fireflies = Array.from({ length: 28 }, () => ({
+        x: Math.random() * WORLD_W,
+        y: Math.random() * WORLD_H,
+        vx: (Math.random() - 0.5) * 0.45,
+        vy: (Math.random() - 0.5) * 0.45,
+        r: 1.5 + Math.random() * 2.2,
+        phase: Math.random() * Math.PI * 2
+      }));
+    }
+
+    // Web Audio API Synthesizer + Ambient Library Music Box
+    let audioCtx = null;
+    let musicInterval = null;
+    let musicStep = 0;
+
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) audioCtx = new Ctx();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    }
+
+    function playTone(freq, duration = 0.14, type = 'sine', delay = 0, vol = 0.1) {
+      if (!state.soundEnabled) return;
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+      gain.gain.setValueAtTime(0.0008, ctx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(vol, ctx.currentTime + delay + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0008, ctx.currentTime + delay + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + duration + 0.03);
+    }
+
+    const AMBIENT_NOTES = [
+      261.63, 329.63, 392.00, 493.88, 523.25, 392.00, 329.63, 293.66,
+      220.00, 261.63, 329.63, 440.00, 392.00, 329.63, 293.66, 246.94
+    ];
+
+    function startAmbientMusic() {
+      if (musicInterval) return;
+      musicInterval = setInterval(() => {
+        if (!state.musicEnabled) return;
+        const worldVisible = !document.getElementById('screen-world').classList.contains('hidden');
+        if (!worldVisible) return;
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        const freq = AMBIENT_NOTES[musicStep % AMBIENT_NOTES.length];
+        musicStep++;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.0005, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.028, ctx.currentTime + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.0005, ctx.currentTime + 1.15);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 1.2);
+      }, 650);
+    }
+
+    function playClick() { playTone(540, 0.07, 'triangle', 0, 0.08); }
+    function playMeow() {
+      playTone(680, 0.12, 'triangle', 0, 0.1);
+      playTone(860, 0.18, 'sine', 0.08, 0.11);
+      playTone(590, 0.22, 'sine', 0.2, 0.09);
+    }
+    function playBoostSound() {
+      playTone(392, 0.08, 'sine', 0, 0.07);
+      playTone(587.33, 0.14, 'triangle', 0.05, 0.08);
+    }
+    function playPickup() {
+      playTone(659.25, 0.09, 'sine', 0, 0.09);
+      playTone(880, 0.15, 'triangle', 0.07, 0.1);
+    }
+    function playSuccess() {
+      playTone(523.25, 0.12, 'triangle', 0, 0.11);
+      playTone(659.25, 0.16, 'triangle', 0.09, 0.11);
+      playTone(783.99, 0.22, 'triangle', 0.18, 0.11);
+    }
+    function playError() {
+      playTone(220, 0.16, 'sawtooth', 0, 0.07);
+    }
+    function playFanfare() {
+      const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+      notes.forEach((n, i) => playTone(n, 0.3, 'triangle', i * 0.11, 0.13));
+    }
+
+    // Unlock an Easter Egg & update HUD
+    function registerEgg(eggId) {
+      if (!state.discoveredEggs.includes(eggId)) {
+        state.discoveredEggs.push(eggId);
+        updateWorldHud();
+      }
+    }
+
+    // Toast Notification
+    let toastTimer = null;
+    function showToast(msg, ok = true) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 z-[70] px-5 py-3 rounded-2xl shadow-2xl text-sm font-semibold border transition-all max-w-xl text-center ' +
+        (ok ? 'bg-emerald-950/95 border-emerald-400/60 text-emerald-100' : 'bg-rose-950/95 border-rose-400/60 text-rose-100');
+      el.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.add('hidden'), 3600);
+    }
+
+    // Render Character Cards on Screen 1
+    function renderCharacters() {
+      const grid = document.getElementById('character-grid');
+      grid.innerHTML = '';
+      CHARACTERS.forEach(ch => {
+        const selected = state.selectedCharId === ch.id;
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = `char-card text-left rounded-2xl p-4 sm:p-5 border bg-teal-950/65 border-teal-800/80 flex flex-col items-center text-center ${selected ? 'selected' : ''}`;
+        card.innerHTML = `
+          <div class="relative mb-3">
+            <img src="${ch.avatar}" alt="${ch.name}" class="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover border-2 ${selected ? 'border-amber-400' : 'border-amber-400/30'} shadow-lg" />
+            <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap px-2.5 py-0.5 rounded-full bg-teal-950 border border-amber-400/50 text-[11px] font-bold text-amber-300 shadow">
+              ${ch.perkName}
+            </span>
+          </div>
+          <h3 class="font-serif-title text-lg font-bold text-amber-50 mt-1">${ch.name}</h3>
+          <p class="text-xs font-semibold text-amber-300/90 mb-1.5">${ch.subtitle}</p>
+          <p class="text-xs text-teal-100/80 leading-relaxed mb-2">${ch.desc}</p>
+          <p class="text-[11px] text-emerald-300/90 bg-emerald-950/50 border border-emerald-500/25 rounded-lg px-2.5 py-1 mt-auto">
+            ${ch.perkDesc}
+          </p>
+        `;
+        card.addEventListener('click', () => {
+          playClick();
+          state.selectedCharId = ch.id;
+          document.getElementById('start-btn').disabled = false;
+          document.getElementById('selected-hint').textContent = `Elegiste a ${ch.name} (${ch.perkName}). ¡Todo listo para empezar!`;
+          renderCharacters();
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    function showScreen(screenId) {
+      ['screen-select', 'screen-world', 'screen-finale'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(screenId).classList.remove('hidden');
+      const restartTop = document.getElementById('restart-top');
+      const viewGradesTop = document.getElementById('view-grades-top');
+      if (screenId === 'screen-select') {
+        restartTop.classList.add('hidden');
+        viewGradesTop.classList.add('hidden');
+      } else {
+        restartTop.classList.remove('hidden');
+        if (state.postGameUnlocked && screenId === 'screen-world') {
+          viewGradesTop.classList.remove('hidden');
+        } else {
+          viewGradesTop.classList.add('hidden');
+        }
+      }
+    }
+
+    function updateWorldHud() {
+      const ch = CHARACTERS.find(c => c.id === state.selectedCharId);
+      if (!ch) return;
+      document.getElementById('hud-avatar').src = ch.avatar;
+      document.getElementById('hud-name').textContent = state.studentName ? `${state.studentName} (${ch.name})` : ch.name;
+      document.getElementById('hud-perk-badge').textContent = state.mateTurboActive ? '🧉 Super Mate Turbo' : ch.perkName;
+      document.getElementById('hud-stars').textContent = `${state.starsCollected}/5`;
+
+      const eggsBadge = document.getElementById('badge-eggs');
+      if (state.postGameUnlocked || state.discoveredEggs.length > 0) {
+        eggsBadge.classList.remove('hidden');
+        document.getElementById('hud-eggs').textContent = `${state.discoveredEggs.length}/4 Secretos`;
+      } else {
+        eggsBadge.classList.add('hidden');
+      }
+
+      const count = state.completedStations.length;
+      const missionEl = document.getElementById('hud-mission');
+      if (state.postGameUnlocked) {
+        missionEl.textContent = `🕵️ Modo Libre Post-Notas · Descubrí los 4 Easter Eggs (Dewey 🐱, Mate 🧉, Estantes 📚 y Arcade 🕹️)`;
+        missionEl.className = 'text-xs text-fuchsia-300 font-bold';
+      } else if (count < 3) {
+        missionEl.textContent = `Sellos obtenidos: ${count}/3 · Explorá las estaciones brillantes y el Claustro Docente`;
+        missionEl.className = 'text-xs text-amber-300/90 font-medium';
+      } else {
+        missionEl.textContent = '¡3/3 Sellos listos! Caminá hacia el Cofre del Acta Final (arriba al centro) 🏆';
+        missionEl.className = 'text-xs text-emerald-300 font-bold animate-pulse';
+      }
+
+      ['tecnologias', 'comunicacion', 'formacion'].forEach(id => {
+        const badge = document.getElementById(`badge-${id}`);
+        const done = state.completedStations.includes(id);
+        if (done) {
+          badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold border bg-emerald-900/75 border-emerald-400 text-emerald-100 flex items-center gap-1 shadow-sm';
+        } else {
+          badge.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold border bg-teal-950/80 border-teal-700/70 text-teal-300/60 flex items-center gap-1';
+        }
+      });
+    }
+
+    function triggerBoost() {
+      if (state.player.boostTimer > 0) return;
+      state.player.boostTimer = 45;
+      playBoostSound();
+      const ch = CHARACTERS.find(c => c.id === state.selectedCharId) || CHARACTERS[0];
+      spawnWorldParticles(state.player.x, state.player.y, ch.color, 18);
+      addFloatingText(state.player.x, state.player.y - 24, '¡Impulso!', ch.color);
+    }
+
+    function spawnWorldParticles(x, y, color = '#f5c451', count = 26) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1 + Math.random() * 3.8;
+        state.particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 0.6,
+          size: 3 + Math.random() * 4,
+          color,
+          alpha: 1,
+          life: 35 + Math.random() * 25
+        });
+      }
+    }
+
+    function addFloatingText(x, y, text, color = '#fde68a') {
+      state.floatingTexts.push({ x, y, text, color, alpha: 1, vy: -1.1, life: 60 });
+    }
+
+    function circleRectCollide(cx, cy, cr, rx, ry, rw, rh) {
+      const closestX = Math.max(rx, Math.min(cx, rx + rw));
+      const closestY = Math.max(ry, Math.min(cy, ry + rh));
+      const dx = cx - closestX;
+      const dy = cy - closestY;
+      return (dx * dx + dy * dy) < (cr * cr);
+    }
+
+    function canMoveTo(nx, ny) {
+      const r = state.player.radius * 0.75;
+      if (nx - r < 18 || nx + r > WORLD_W - 18 || ny - r < 24 || ny + r > WORLD_H - 18) {
+        return false;
+      }
+      for (const ob of OBSTACLES) {
+        if (circleRectCollide(nx, ny, r, ob.x, ob.y, ob.w, ob.h)) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function getActiveStations() {
+      return state.postGameUnlocked ? [...STATIONS, ...POSTGAME_STATIONS] : STATIONS;
+    }
+
+    function getNearbyStation() {
+      let closest = null;
+      let minDist = Infinity;
+      for (const st of getActiveStations()) {
+        const dx = state.player.x - st.x;
+        const dy = state.player.y - st.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist <= st.interactDist && dist < minDist) {
+          minDist = dist;
+          closest = st;
+        }
+      }
+      // Also check if near Dewey the Library Cat in Post-Game
+      if (state.postGameUnlocked) {
+        const catDist = Math.hypot(state.player.x - state.cat.x, state.player.y - state.cat.y);
+        if (catDist <= 64 && catDist < minDist) {
+          closest = {
+            id: 'michi',
+            name: 'Dewey · El Michi Bibliotecario',
+            shortTitle: 'Acariciar a Dewey 🐱',
+            icon: '🐱',
+            x: state.cat.x,
+            y: state.cat.y
+          };
+        }
+      }
+      return closest;
+    }
+
+    // Start Post-Game Arcade Mini-Game: Flying Books!
+    function startArcadeMiniGame() {
+      registerEgg('arcade');
+      playFanfare();
+      state.arcade.active = true;
+      state.arcade.framesLeft = 20 * 60; // 20 seconds at 60fps
+      state.arcade.score = 0;
+      state.arcade.books = [];
+      for (let i = 0; i < 7; i++) {
+        spawnArcadeBook();
+      }
+      document.getElementById('arcade-banner').classList.remove('hidden');
+      showToast('🕹️ ¡MINI-JUEGO INICIADO! Corré por la biblioteca y atrapá tantos Libros Voladores como puedas en 20 segundos.', true);
+    }
+
+    function spawnArcadeBook() {
+      const icons = ['📕', '📗', '📘', '📙', '🌟'];
+      state.arcade.books.push({
+        x: 90 + Math.random() * (WORLD_W - 180),
+        y: 90 + Math.random() * (WORLD_H - 180),
+        vx: (Math.random() - 0.5) * 3.2,
+        vy: (Math.random() - 0.5) * 3.2,
+        icon: icons[Math.floor(Math.random() * icons.length)]
+      });
+    }
+
+    let worldLoopId = null;
+    let tickCount = 0;
+
+    function updateWorld() {
+      tickCount++;
+      const dialog = document.getElementById('challenge-dialog');
+      const isModalOpen = dialog && dialog.open;
+
+      // Update ambient fireflies
+      state.fireflies.forEach(f => {
+        f.x += f.vx;
+        f.y += f.vy;
+        if (f.x < 10 || f.x > WORLD_W - 10) f.vx *= -1;
+        if (f.y < 10 || f.y > WORLD_H - 10) f.vy *= -1;
+      });
+
+      // Update Dewey the Library Cat wandering around central area in Post-Game
+      if (state.postGameUnlocked) {
+        const c = state.cat;
+        if (c.pauseTimer > 0) {
+          c.pauseTimer--;
+        } else {
+          c.x += c.vx;
+          c.y += c.vy;
+          if (c.x < 395 || c.x > 565) c.vx *= -1;
+          if (c.y < 185 || c.y > 410) c.vy *= -1;
+          if (Math.random() < 0.008) {
+            c.pauseTimer = 70;
+          }
+        }
+      }
+
+      // Update Arcade Mini-Game if active
+      if (state.arcade.active) {
+        state.arcade.framesLeft--;
+        const secs = Math.ceil(state.arcade.framesLeft / 60);
+        document.getElementById('arcade-timer').textContent = `⏱️ ${secs}s`;
+        document.getElementById('arcade-score').textContent = `📚 ${state.arcade.score} atrapados`;
+
+        for (let i = state.arcade.books.length - 1; i >= 0; i--) {
+          const b = state.arcade.books[i];
+          b.x += b.vx;
+          b.y += b.vy;
+          if (b.x < 45 || b.x > WORLD_W - 45) b.vx *= -1;
+          if (b.y < 65 || b.y > WORLD_H - 45) b.vy *= -1;
+
+          // Check player catch
+          if (Math.hypot(state.player.x - b.x, state.player.y - b.y) < 38) {
+            state.arcade.score++;
+            playPickup();
+            spawnWorldParticles(b.x, b.y, '#e879f9', 16);
+            addFloatingText(b.x, b.y - 10, '+1 Incunable!', '#f0abfc');
+            state.arcade.books.splice(i, 1);
+            spawnArcadeBook();
+          }
+        }
+
+        if (state.arcade.framesLeft <= 0) {
+          state.arcade.active = false;
+          state.arcade.books = [];
+          document.getElementById('arcade-banner').classList.add('hidden');
+          if (state.arcade.score > state.bestArcadeScore) {
+            state.bestArcadeScore = state.arcade.score;
+          }
+          playFanfare();
+          showToast(`🏆 ¡Tiempo cumplido! Atrapaste ${state.arcade.score} Libros Voladores (Récord: ${state.bestArcadeScore}). ¡Podés jugar de nuevo cuando quieras!`, true);
+        }
+      }
+
+      // Handle Chest Opening Cinematic countdown
+      if (state.chestOpeningCinematic) {
+        state.chestCinematicTimer--;
+        const chest = STATIONS.find(s => s.id === 'cofre');
+        if (tickCount % 4 === 0 && chest) {
+          spawnWorldParticles(
+            chest.x + (Math.random() - 0.5) * 60,
+            chest.y + (Math.random() - 0.5) * 40,
+            ['#f5c451', '#34d399', '#38bdf8', '#f472b6'][tickCount % 4],
+            12
+          );
+        }
+        if (state.chestCinematicTimer <= 0) {
+          state.chestOpeningCinematic = false;
+          showFinale();
+        }
+      }
+
+      const ch = CHARACTERS.find(c => c.id === state.selectedCharId) || CHARACTERS[0];
+      const p = state.player;
+      if (p.boostTimer > 0) p.boostTimer--;
+      const mateMultiplier = state.mateTurboActive ? 1.32 : 1;
+      const currentSpeed = ch.baseSpeed * mateMultiplier * (p.boostTimer > 0 ? 1.55 : 1);
+
+      let dx = 0;
+      let dy = 0;
+
+      if (!isModalOpen && !state.chestOpeningCinematic) {
+        if (state.keys.up) dy -= 1;
+        if (state.keys.down) dy += 1;
+        if (state.keys.left) dx -= 1;
+        if (state.keys.right) dx += 1;
+
+        if (dx !== 0 || dy !== 0) {
+          p.targetX = null;
+          p.targetY = null;
+          p.targetStation = null;
+          const len = Math.hypot(dx, dy);
+          dx = (dx / len) * currentSpeed;
+          dy = (dy / len) * currentSpeed;
+        } else if (p.targetX !== null && p.targetY !== null) {
+          const tdx = p.targetX - p.x;
+          const tdy = p.targetY - p.y;
+          const dist = Math.hypot(tdx, tdy);
+          if (dist > 6) {
+            dx = (tdx / dist) * currentSpeed;
+            dy = (tdy / dist) * currentSpeed;
+          } else {
+            p.targetX = null;
+            p.targetY = null;
+            if (p.targetStation) {
+              const stToOpen = p.targetStation;
+              p.targetStation = null;
+              interactWithStation(stToOpen);
+            }
+          }
+        }
+      }
+
+      p.moving = false;
+      if (dx !== 0 || dy !== 0) {
+        if (Math.abs(dx) > Math.abs(dy)) {
+          p.facing = dx > 0 ? 'right' : 'left';
+        } else {
+          p.facing = dy > 0 ? 'down' : 'up';
+        }
+
+        let moved = false;
+        if (canMoveTo(p.x + dx, p.y)) {
+          p.x += dx;
+          moved = true;
+        }
+        if (canMoveTo(p.x, p.y + dy)) {
+          p.y += dy;
+          moved = true;
+        }
+        if (moved) {
+          p.moving = true;
+          p.walkFrame += p.boostTimer > 0 ? 0.34 : 0.22;
+          if (tickCount % (p.boostTimer > 0 || state.mateTurboActive ? 3 : 7) === 0) {
+            const rainbowColors = ['#f5c451', '#34d399', '#38bdf8', '#f472b6', '#a78bfa'];
+            state.particles.push({
+              x: p.x + (Math.random() - 0.5) * 16,
+              y: p.y + 18,
+              vx: (Math.random() - 0.5) * 0.5,
+              vy: -0.35,
+              size: p.boostTimer > 0 || state.mateTurboActive ? 3.8 : 2.5,
+              color: state.mateTurboActive
+                ? rainbowColors[tickCount % rainbowColors.length]
+                : (p.boostTimer > 0 ? ch.color : 'rgba(245, 196, 81, 0.55)'),
+              alpha: 0.85,
+              life: 20
+            });
+          }
+        } else {
+          p.targetX = null;
+          p.targetY = null;
+          p.targetStation = null;
+        }
+      }
+
+      // Check collectible Golden Codices
+      COLLECTIBLES.forEach(item => {
+        if (!item.collected) {
+          const d = Math.hypot(p.x - item.x, p.y - item.y);
+          if (d < ch.magnetRadius && d > 28) {
+            item.x += (p.x - item.x) * 0.12;
+            item.y += (p.y - item.y) * 0.12;
+          }
+          if (d < 34) {
+            item.collected = true;
+            state.starsCollected++;
+            playPickup();
+            spawnWorldParticles(item.x, item.y, '#fde047', 24);
+            addFloatingText(item.x, item.y - 12, item.label, '#fde047');
+            updateWorldHud();
+            if (state.starsCollected === 5) {
+              showToast('🌟 ¡Reuniste los 5 Códices Dorados! Desbloqueaste la Mención de Honor en tu Diploma.', true);
+            }
+          }
+        }
+      });
+
+      // Contextual prompt
+      const nearby = getNearbyStation();
+      const promptWrap = document.getElementById('interact-prompt');
+      const promptText = document.getElementById('interact-text');
+      const promptIcon = document.getElementById('interact-icon');
+
+      if (nearby && !isModalOpen && !state.chestOpeningCinematic) {
+        promptWrap.classList.remove('hidden');
+        promptIcon.textContent = nearby.icon;
+        if (nearby.id === 'cofre') {
+          if (state.completedStations.length === 3) {
+            promptText.textContent = '¡Abrir Cofre de Notas Finales! (Espacio / Clic)';
+          } else {
+            promptText.textContent = `Cofre del Acta (${state.completedStations.length}/3 sellos)`;
+          }
+        } else if (nearby.id === 'claustro') {
+          promptText.textContent = 'Leer Libro de Oro del Equipo Docente (Espacio / Clic)';
+        } else if (nearby.id === 'michi') {
+          promptText.textContent = 'Acariciar a Dewey, el Michi Bibliotecario 🐱 (Espacio / Clic)';
+        } else if (nearby.id === 'mate') {
+          promptText.textContent = 'Tomar un Mate en el Rincón FEB 🧉 (Espacio / Clic)';
+        } else if (nearby.id === 'arcade') {
+          promptText.textContent = 'Jugar Mini-Juego: Lluvia de Incunables 🕹️ (Espacio / Clic)';
+        } else {
+          const done = state.completedStations.includes(nearby.id);
+          promptText.textContent = done
+            ? `${nearby.shortTitle} (Sello obtenido ✅)`
+            : `Resolver: ${nearby.shortTitle} (Espacio / Clic)`;
+        }
+      } else {
+        promptWrap.classList.add('hidden');
+      }
+
+      // Update particles & floating texts
+      for (let i = state.particles.length - 1; i >= 0; i--) {
+        const pt = state.particles[i];
+        pt.x += pt.vx;
+        pt.y += pt.vy;
+        pt.life--;
+        pt.alpha = Math.max(0, pt.life / 40);
+        if (pt.life <= 0) state.particles.splice(i, 1);
+      }
+
+      for (let i = state.floatingTexts.length - 1; i >= 0; i--) {
+        const ft = state.floatingTexts[i];
+        ft.y += ft.vy;
+        ft.life--;
+        ft.alpha = Math.max(0, ft.life / 45);
+        if (ft.life <= 0) state.floatingTexts.splice(i, 1);
+      }
+    }
+
+    // Draw 2D Library RPG World on Canvas
+    function drawWorld() {
+      const canvas = document.getElementById('game-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, WORLD_W, WORLD_H);
+
+      // 1. Warm Wood Floor
+      const floorGrad = ctx.createLinearGradient(0, 0, 0, WORLD_H);
+      floorGrad.addColorStop(0, '#162d32');
+      floorGrad.addColorStop(1, '#0c1c20');
+      ctx.fillStyle = floorGrad;
+      ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+
+      // Subtle floor tiles grid
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < WORLD_W; x += 48) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, WORLD_H);
+        ctx.stroke();
+      }
+      for (let y = 0; y < WORLD_H; y += 48) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(WORLD_W, y);
+        ctx.stroke();
+      }
+
+      // Stained Glass Sunbeams from top windows
+      ctx.save();
+      const beamPositions = [180, 480, 780];
+      beamPositions.forEach((bx, idx) => {
+        const beamGrad = ctx.createLinearGradient(bx, 0, bx + 40, 240);
+        beamGrad.addColorStop(0, idx === 1 ? 'rgba(245, 196, 81, 0.14)' : 'rgba(56, 189, 248, 0.09)');
+        beamGrad.addColorStop(1, 'rgba(245, 196, 81, 0)');
+        ctx.fillStyle = beamGrad;
+        ctx.beginPath();
+        ctx.moveTo(bx - 55, 0);
+        ctx.lineTo(bx + 55, 0);
+        ctx.lineTo(bx + 105, 240);
+        ctx.lineTo(bx - 25, 240);
+        ctx.closePath();
+        ctx.fill();
+      });
+      ctx.restore();
+
+      // 2. Central Royal Library Carpet
+      ctx.fillStyle = 'rgba(17, 68, 64, 0.78)';
+      ctx.strokeStyle = 'rgba(229, 184, 75, 0.48)';
+      ctx.lineWidth = 3;
+      ctx.fillRect(415, 58, 130, 522);
+      ctx.strokeRect(415, 58, 130, 522);
+      ctx.fillRect(140, 185, 680, 74);
+      ctx.strokeRect(140, 185, 680, 74);
+      ctx.fillRect(230, 442, 500, 56);
+      ctx.strokeRect(230, 442, 500, 56);
+
+      // Entrance Welcome Mat
+      ctx.fillStyle = '#1e3a3a';
+      ctx.fillRect(430, 560, 100, 28);
+      ctx.strokeStyle = '#e5b84b';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(430, 560, 100, 28);
+      ctx.fillStyle = '#fde68a';
+      ctx.font = 'bold 10px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('ENTRADA FEB', 480, 578);
+
+      // 3. Glowing Energy Lines from completed stations to the Final Chest
+      const chest = STATIONS.find(s => s.id === 'cofre');
+      STATIONS.forEach(st => {
+        if (st.id !== 'cofre' && st.id !== 'claustro' && state.completedStations.includes(st.id)) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(st.x, st.y);
+          ctx.lineTo(chest.x, chest.y);
+          ctx.strokeStyle = st.color;
+          ctx.lineWidth = state.chestOpeningCinematic ? 5 : 3;
+          ctx.setLineDash([8, 6]);
+          ctx.lineDashOffset = -tickCount * (state.chestOpeningCinematic ? 2.2 : 0.65);
+          ctx.globalAlpha = state.chestOpeningCinematic ? 0.9 : 0.58;
+          ctx.stroke();
+          ctx.restore();
+        }
+      });
+
+      // 4. Draw Obstacles (Walls, Bookshelves, Reading Tables)
+      OBSTACLES.forEach(ob => {
+        ctx.save();
+        if (ob.type === 'wall') {
+          ctx.fillStyle = '#091518';
+          ctx.fillRect(ob.x, ob.y, ob.w, ob.h);
+          ctx.strokeStyle = 'rgba(229, 184, 75, 0.35)';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(ob.x, ob.y, ob.w, ob.h);
+          ctx.fillStyle = 'rgba(245, 196, 81, 0.68)';
+          ctx.font = 'bold 11px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(ob.label, ob.x + ob.w / 2, ob.y + 30);
+        } else if (ob.type === 'shelf') {
+          ctx.fillStyle = 'rgba(0,0,0,0.45)';
+          ctx.fillRect(ob.x + 4, ob.y + 6, ob.w, ob.h);
+          ctx.fillStyle = '#452719';
+          ctx.fillRect(ob.x, ob.y, ob.w, ob.h);
+          ctx.strokeStyle = '#925836';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(ob.x, ob.y, ob.w, ob.h);
+          const bookColors = ['#ef4444', '#38bdf8', '#fbbf24', '#34d399', '#a78bfa', '#f472b6'];
+          for (let bx = ob.x + 8; bx < ob.x + ob.w - 10; bx += 11) {
+            ctx.fillStyle = bookColors[(bx + ob.y) % bookColors.length];
+            ctx.fillRect(bx, ob.y + 6, 7, 13);
+            ctx.fillStyle = bookColors[(bx + ob.y + 2) % bookColors.length];
+            ctx.fillRect(bx, ob.y + 23, 7, 13);
+          }
+          ctx.fillStyle = 'rgba(11, 25, 29, 0.9)';
+          ctx.fillRect(ob.x + 14, ob.y + 12, ob.w - 28, 18);
+          ctx.fillStyle = '#fde68a';
+          ctx.font = '600 10px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(ob.label, ob.x + ob.w / 2, ob.y + 24);
+        } else if (ob.type === 'table') {
+          const lampGlow = ctx.createRadialGradient(
+            ob.x + ob.w / 2, ob.y + ob.h / 2, 5,
+            ob.x + ob.w / 2, ob.y + ob.h / 2, 74
+          );
+          if (state.violetLamps) {
+            lampGlow.addColorStop(0, 'rgba(217, 70, 239, 0.36)');
+            lampGlow.addColorStop(1, 'rgba(217, 70, 239, 0)');
+          } else {
+            lampGlow.addColorStop(0, 'rgba(251, 191, 36, 0.28)');
+            lampGlow.addColorStop(1, 'rgba(251, 191, 36, 0)');
+          }
+          ctx.fillStyle = lampGlow;
+          ctx.beginPath();
+          ctx.arc(ob.x + ob.w / 2, ob.y + ob.h / 2, 74, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#5c3422';
+          ctx.beginPath();
+          ctx.roundRect(ob.x, ob.y, ob.w, ob.h, 10);
+          ctx.fill();
+          ctx.strokeStyle = '#b47b56';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.fillStyle = '#fef3c7';
+          ctx.fillRect(ob.x + 15, ob.y + 16, 20, 16);
+          ctx.fillStyle = state.violetLamps ? '#e879f9' : '#10b981';
+          ctx.beginPath();
+          ctx.arc(ob.x + ob.w - 22, ob.y + ob.h / 2, 9, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      });
+
+      // 5. Draw Collectibles (Golden Codices 📖)
+      COLLECTIBLES.forEach(item => {
+        if (item.collected) return;
+        const bob = Math.sin(tickCount * 0.08 + item.id) * 4;
+        ctx.save();
+        const glow = ctx.createRadialGradient(item.x, item.y + bob, 2, item.x, item.y + bob, 24);
+        glow.addColorStop(0, 'rgba(253, 224, 71, 0.7)');
+        glow.addColorStop(1, 'rgba(253, 224, 71, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(item.x, item.y + bob, 24, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.font = '20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('📖', item.x, item.y + bob);
+        ctx.restore();
+      });
+
+      // 5b. Draw Flying Books during Arcade Mini-Game
+      if (state.arcade.active) {
+        state.arcade.books.forEach((b, idx) => {
+          const bob = Math.sin(tickCount * 0.15 + idx) * 4;
+          ctx.save();
+          ctx.font = '24px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(b.icon, b.x, b.y + bob);
+          ctx.restore();
+        });
+      }
+
+      // 6. Draw Interactive Stations, Claustro Docente, Post-Game Stations & Final Chest
+      getActiveStations().forEach(st => {
+        const isChest = st.id === 'cofre';
+        const isClaustro = st.id === 'claustro';
+        const isPostGameSt = st.id === 'mate' || st.id === 'arcade';
+        const isDone = isClaustro
+          ? state.visitedClaustro
+          : (isPostGameSt ? state.discoveredEggs.includes(st.id) : state.completedStations.includes(st.id));
+        const allReady = state.completedStations.length === 3;
+        const pulse = Math.sin(tickCount * 0.07) * 5;
+
+        ctx.save();
+        const auraGrad = ctx.createRadialGradient(st.x, st.y, 8, st.x, st.y, st.radius + 18 + pulse);
+        if (isChest) {
+          auraGrad.addColorStop(0, allReady ? 'rgba(245, 196, 81, 0.65)' : 'rgba(245, 196, 81, 0.2)');
+          auraGrad.addColorStop(1, 'rgba(245, 196, 81, 0)');
+        } else if (isClaustro || isPostGameSt) {
+          auraGrad.addColorStop(0, 'rgba(244, 114, 182, 0.42)');
+          auraGrad.addColorStop(1, 'rgba(244, 114, 182, 0)');
+        } else {
+          auraGrad.addColorStop(0, isDone ? 'rgba(52, 211, 153, 0.45)' : 'rgba(56, 189, 248, 0.35)');
+          auraGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+        }
+        ctx.fillStyle = auraGrad;
+        ctx.beginPath();
+        ctx.arc(st.x, st.y, st.radius + 18 + pulse, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pedestal circle
+        ctx.beginPath();
+        ctx.arc(st.x, st.y, st.radius, 0, Math.PI * 2);
+        ctx.fillStyle = isDone && !isClaustro && !isPostGameSt ? '#064e3b' : '#11282d';
+        ctx.fill();
+        ctx.lineWidth = isChest && allReady ? 4 : 3;
+        ctx.strokeStyle = isDone && !isClaustro && !isPostGameSt ? '#34d399' : st.color;
+        ctx.stroke();
+
+        // Station Icon
+        ctx.font = isChest ? '34px sans-serif' : '26px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(isDone && !isClaustro && !isPostGameSt ? '✅' : st.icon, st.x, st.y - 2);
+
+        // Floating bouncing indicator
+        if ((!isChest && !isClaustro && !isPostGameSt && !isDone) || (isChest && allReady && !state.postGameUnlocked) || isPostGameSt) {
+          const arrowY = st.y - st.radius - 14 + Math.sin(tickCount * 0.12) * 4;
+          ctx.fillStyle = isChest ? '#fde047' : (isPostGameSt ? '#f0abfc' : '#38bdf8');
+          ctx.font = 'bold 10px Inter, sans-serif';
+          ctx.fillText(
+            isChest ? '▼ ¡ABRIR COFRE! ▼' : (isPostGameSt ? '▼ EASTER EGG ▼' : '▼ DESAFÍO ▼'),
+            st.x,
+            arrowY
+          );
+        }
+
+        // Station Title Label Plate
+        const labelW = 160;
+        const labelH = 34;
+        ctx.fillStyle = 'rgba(8, 20, 24, 0.92)';
+        ctx.beginPath();
+        ctx.roundRect(st.x - labelW / 2, st.y + st.radius + 5, labelW, labelH, 8);
+        ctx.fill();
+        ctx.strokeStyle = isDone ? 'rgba(52, 211, 153, 0.6)' : 'rgba(245, 196, 81, 0.4)';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        ctx.fillStyle = '#f8f5ee';
+        ctx.font = 'bold 11px Inter, sans-serif';
+        ctx.fillText(st.shortTitle, st.x, st.y + st.radius + 19);
+        ctx.fillStyle = isDone && !isClaustro && !isPostGameSt ? '#6ee7b7' : '#fcd34d';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.fillText(
+          isChest
+            ? `${state.completedStations.length}/3 Sellos Activos`
+            : (isDone && !isClaustro && !isPostGameSt ? 'Sello Obtenido' : st.subtitle),
+          st.x,
+          st.y + st.radius + 32
+        );
+        ctx.restore();
+      });
+
+      // 6b. Draw Dewey the Library Cat in Post-Game
+      if (state.postGameUnlocked) {
+        const c = state.cat;
+        const catBob = Math.sin(tickCount * 0.12) * 2.5;
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.beginPath();
+        ctx.ellipse(c.x, c.y + 14, 14, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.font = '28px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🐱', c.x, c.y + catBob);
+
+        ctx.fillStyle = 'rgba(11, 25, 29, 0.88)';
+        ctx.beginPath();
+        ctx.roundRect(c.x - 46, c.y - 32 + catBob, 92, 16, 6);
+        ctx.fill();
+        ctx.fillStyle = '#fde047';
+        ctx.font = 'bold 10px Inter, sans-serif';
+        ctx.fillText('Dewey (Michi)', c.x, c.y - 24 + catBob);
+        ctx.restore();
+      }
+
+      // 7. Click-to-move destination marker
+      if (state.player.targetX !== null && state.player.targetY !== null) {
+        ctx.save();
+        ctx.strokeStyle = '#f5c451';
+        ctx.lineWidth = 2;
+        const r = 8 + (tickCount % 15);
+        ctx.globalAlpha = 1 - (tickCount % 15) / 15;
+        ctx.beginPath();
+        ctx.arc(state.player.targetX, state.player.targetY, r, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 8. Draw Player Character + Character-Specific Perk Visuals
+      const p = state.player;
+      const ch = CHARACTERS.find(c => c.id === state.selectedCharId) || CHARACTERS[0];
+      const bobY = p.moving ? Math.abs(Math.sin(p.walkFrame)) * -5 : Math.sin(tickCount * 0.05) * 1.5;
+
+      if (ch.id === 'bibliotecario') {
+        let closestBook = null;
+        let minBookDist = Infinity;
+        COLLECTIBLES.forEach(item => {
+          if (!item.collected) {
+            const d = Math.hypot(item.x - p.x, item.y - p.y);
+            if (d < minBookDist) {
+              minBookDist = d;
+              closestBook = item;
+            }
+          }
+        });
+        if (closestBook) {
+          const angle = Math.atan2(closestBook.y - p.y, closestBook.x - p.x);
+          const rx = p.x + Math.cos(angle) * 34;
+          const ry = p.y + Math.sin(angle) * 34;
+          ctx.save();
+          ctx.fillStyle = '#fde047';
+          ctx.beginPath();
+          ctx.arc(rx, ry, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      if (ch.id === 'bibliotecaria' && state.starsCollected < 5) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(244, 114, 182, 0.22)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, ch.magnetRadius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y + 22, 18, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (p.moving) {
+        const leftFootOffset = Math.sin(p.walkFrame) * 5;
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(p.x - 7, p.y + 19 + leftFootOffset, 4, 0, Math.PI * 2);
+        ctx.arc(p.x + 7, p.y + 19 - leftFootOffset, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = ch.cloak;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y + 8 + bobY, 17, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y - 4 + bobY, 21, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+
+      const img = avatarImages[ch.id];
+      if (img && img.complete && img.naturalWidth > 0) {
+        ctx.drawImage(img, p.x - 21, p.y - 25 + bobY, 42, 42);
+      } else {
+        ctx.fillStyle = ch.color;
+        ctx.fillRect(p.x - 21, p.y - 25 + bobY, 42, 42);
+      }
+      ctx.restore();
+
+      ctx.strokeStyle = state.mateTurboActive ? '#34d399' : (p.boostTimer > 0 ? '#fde047' : '#f5c451');
+      ctx.lineWidth = p.boostTimer > 0 || state.mateTurboActive ? 4 : 3;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y - 4 + bobY, 21, 0, Math.PI * 2);
+      ctx.stroke();
+
+      const displayTag = state.studentName ? state.studentName : ch.name;
+      ctx.font = 'bold 11px Inter, sans-serif';
+      const tagW = Math.max(68, ctx.measureText(displayTag).width + 16);
+      ctx.fillStyle = 'rgba(11, 25, 29, 0.9)';
+      ctx.beginPath();
+      ctx.roundRect(p.x - tagW / 2, p.y - 44 + bobY, tagW, 18, 6);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(245, 196, 81, 0.65)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = '#fde68a';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(displayTag, p.x, p.y - 35 + bobY);
+      ctx.restore();
+
+      // 9. Ambient Fireflies of Knowledge
+      state.fireflies.forEach(f => {
+        const alpha = 0.25 + 0.45 * Math.sin(tickCount * 0.05 + f.phase);
+        ctx.save();
+        ctx.globalAlpha = Math.max(0.1, alpha);
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      // 10. Particles & Floating Texts
+      state.particles.forEach(pt => {
+        ctx.save();
+        ctx.globalAlpha = pt.alpha;
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      state.floatingTexts.forEach(ft => {
+        ctx.save();
+        ctx.globalAlpha = ft.alpha;
+        ctx.font = 'bold 13px Inter, sans-serif';
+        ctx.fillStyle = ft.color;
+        ctx.textAlign = 'center';
+        ctx.fillText(ft.text, ft.x, ft.y);
+        ctx.restore();
+      });
+    }
+
+    function gameLoop() {
+      updateWorld();
+      drawWorld();
+      worldLoopId = requestAnimationFrame(gameLoop);
+    }
+
+    // Station & Easter Egg Interaction Logic
+    function interactWithStation(station) {
+      if (!station || state.chestOpeningCinematic) return;
+      state.keys.up = state.keys.down = state.keys.left = state.keys.right = false;
+      state.player.targetX = null;
+      state.player.targetY = null;
+
+      // Easter Egg 1: Dewey the Library Cat
+      if (station.id === 'michi') {
+        playMeow();
+        registerEgg('michi');
+        spawnWorldParticles(state.cat.x, state.cat.y, '#fbbf24', 22);
+        addFloatingText(state.cat.x, state.cat.y - 28, '💛 Prrrr... Miau!', '#fde047');
+        const msg = DEWEY_QUOTES[state.deweyQuoteIdx % DEWEY_QUOTES.length];
+        state.deweyQuoteIdx++;
+        showToast(msg, true);
+        return;
+      }
+
+      // Easter Egg 2: Rincón del Mate FEB
+      if (station.id === 'mate') {
+        playSuccess();
+        registerEgg('mate');
+        state.mateTurboActive = true;
+        updateWorldHud();
+        spawnWorldParticles(station.x, station.y, '#34d399', 28);
+        addFloatingText(station.x, station.y - 25, '🧉 ¡Super Mate Turbo!', '#6ee7b7');
+        const msg = MATE_QUOTES[state.mateQuoteIdx % MATE_QUOTES.length];
+        state.mateQuoteIdx++;
+        showToast(msg, true);
+        return;
+      }
+
+      // Easter Egg 3: Mini-Juego Arcade
+      if (station.id === 'arcade') {
+        startArcadeMiniGame();
+        return;
+      }
+
+      if (station.id === 'cofre') {
+        if (state.completedStations.length < 3) {
+          playError();
+          const faltan = 3 - state.completedStations.length;
+          showToast(`¡El Cofre tiene 3 cerraduras! Te falta conseguir ${faltan} sello${faltan > 1 ? 's' : ''} en las estaciones de la biblioteca.`, false);
+          return;
+        }
+        if (state.postGameUnlocked) {
+          showFinale();
+          return;
+        }
+        playFanfare();
+        state.chestOpeningCinematic = true;
+        state.chestCinematicTimer = 75;
+        addFloatingText(station.x, station.y - 30, '✨ ¡ABRIENDO EL ACTA FINAL! ✨', '#fde047');
+        spawnWorldParticles(station.x, station.y, '#f5c451', 50);
+        return;
+      }
+
+      playClick();
+      state.activeStationId = station.id;
+      const dialog = document.getElementById('challenge-dialog');
+      document.getElementById('dialog-station-badge').textContent = `${station.icon} ${station.name}`;
+
+      if (station.id === 'claustro') {
+        state.visitedClaustro = true;
+        document.getElementById('dialog-station-title').textContent = 'Libro de Oro del Claustro Docente';
+        renderClaustroBook();
+      } else if (station.id === 'tecnologias') {
+        document.getElementById('dialog-station-title').textContent = 'Conectá los conceptos tecnológicos';
+        renderStationChallenge1();
+      } else if (station.id === 'comunicacion') {
+        document.getElementById('dialog-station-title').textContent = 'La Brújula en la Red';
+        renderStationChallenge2();
+      } else if (station.id === 'formacion') {
+        document.getElementById('dialog-station-title').textContent = 'La Llave de la Autonomía';
+        renderStationChallenge3();
+      }
+
+      if (!dialog.open) {
+        dialog.showModal();
+      }
+    }
+
+    function renderClaustroBook() {
+      const container = document.getElementById('dialog-station-body');
+      container.innerHTML = `
+        <p class="text-sm text-teal-100/90 mb-4 leading-relaxed">
+          ¡Bienvenido/a al corazón de la Gran Biblioteca FEB! Tus docentes de las materias dejaron estas palabras especiales para acompañarte en el cierre del ciclo lectivo:
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+          ${DOCENTES.map(d => `
+            <div class="p-4 rounded-2xl bg-teal-950/85 border border-amber-400/35 flex flex-col justify-between">
+              <p class="text-xs sm:text-sm text-amber-50/95 italic leading-relaxed mb-3">${d.quote}</p>
+              <div class="flex items-center gap-2 pt-2 border-t border-teal-800/80">
+                <span class="text-base">🎓</span>
+                <div>
+                  <p class="font-serif-title text-sm font-bold text-amber-300">${d.name}</p>
+                  <p class="text-[11px] text-teal-300/80">${d.role}</p>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="flex items-center justify-between gap-3 pt-2">
+          <p class="text-xs text-amber-200/85">
+            💡 <em>Recordá: juntá los 3 sellos de las estaciones para abrir el Cofre del Norte.</em>
+          </p>
+          <button id="claustro-ok-btn" type="button" class="btn-gold px-6 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shrink-0">
+            ✨ ¡Gracias, Profes! Seguir explorando
+          </button>
+        </div>
+      `;
+      document.getElementById('claustro-ok-btn').addEventListener('click', () => {
+        playPickup();
+        const dialog = document.getElementById('challenge-dialog');
+        if (dialog && dialog.open) dialog.close();
+        const st = STATIONS.find(s => s.id === 'claustro');
+        if (st) spawnWorldParticles(st.x, st.y, '#f472b6', 25);
+      });
+    }
+
+    function completeStation(stationId, sealName) {
+      const dialog = document.getElementById('challenge-dialog');
+      if (dialog && dialog.open) dialog.close();
+
+      if (!state.completedStations.includes(stationId)) {
+        state.completedStations.push(stationId);
+      }
+      playSuccess();
+      const st = STATIONS.find(s => s.id === stationId);
+      if (st) {
+        spawnWorldParticles(st.x, st.y, '#34d399', 36);
+        addFloatingText(st.x, st.y - 25, `¡${sealName} Desbloqueado!`, '#6ee7b7');
+      }
+      updateWorldHud();
+
+      if (state.completedStations.length === 3) {
+        showToast('🎉 ¡Conseguiste los 3 Sellos! Ahora caminá hasta el Cofre del Acta Final (arriba al centro).', true);
+      } else {
+        showToast(`¡Excelente! Obtuviste el ${sealName}. ¡Seguí explorando la biblioteca!`, true);
+      }
+    }
+
+    // CHALLENGE 1: Tecnologías aplicadas a las bibliotecas
+    const C1_PAIRS = [
+      { id: 'opac', term: 'OPAC', def: 'Catálogo público en línea para que los lectores consulten el acervo' },
+      { id: 'dublin', term: 'Dublin Core / MARC 21', def: 'Estándares de metadatos para describir y organizar recursos' },
+      { id: 'sigb', term: 'Koha / PMB', def: 'Sistemas integrados de gestión bibliotecaria (SIGB) de software libre' }
+    ];
+    const C1_DEFS_SHUFFLED = [C1_PAIRS[1], C1_PAIRS[2], C1_PAIRS[0]];
+
+    function renderStationChallenge1() {
+      const container = document.getElementById('dialog-station-body');
+      const allDone = state.c1Matched.length === C1_PAIRS.length;
+
+      container.innerHTML = `
+        <p class="text-sm text-teal-100/85 mb-4">
+          Tocá primero una herramienta o estándar de la izquierda y luego su función en la biblioteca a la derecha:
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+          <div class="space-y-2.5" id="c1-terms"></div>
+          <div class="space-y-2.5" id="c1-defs"></div>
+        </div>
+
+        <div class="flex justify-end">
+          <button id="c1-claim" type="button" ${allDone ? '' : 'disabled'} class="btn-gold px-6 py-3 rounded-xl text-sm shadow-lg">
+            ⚙️ Reclamar Sello Tecnológico y seguir jugando →
+          </button>
+        </div>
+      `;
+
+      const termsEl = document.getElementById('c1-terms');
+      const defsEl = document.getElementById('c1-defs');
+
+      C1_PAIRS.forEach(item => {
+        const matched = state.c1Matched.includes(item.id);
+        const selected = state.c1SelectedTerm === item.id;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.disabled = matched;
+        btn.className = `option-btn w-full text-left p-3.5 rounded-xl border font-semibold text-sm flex items-center justify-between ${
+          matched
+            ? 'bg-emerald-900/40 border-emerald-400/60 text-emerald-200'
+            : selected
+              ? 'bg-amber-400/20 border-amber-400 text-amber-100'
+              : 'bg-teal-950/80 border-teal-800 text-amber-50'
+        }`;
+        btn.innerHTML = `<span>${item.term}</span><span>${matched ? '✅' : selected ? '👉' : ''}</span>`;
+        btn.addEventListener('click', () => {
+          playClick();
+          state.c1SelectedTerm = item.id;
+          renderStationChallenge1();
+        });
+        termsEl.appendChild(btn);
+      });
+
+      C1_DEFS_SHUFFLED.forEach(item => {
+        const matched = state.c1Matched.includes(item.id);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.disabled = matched;
+        btn.className = `option-btn w-full text-left p-3.5 rounded-xl border text-sm leading-snug ${
+          matched
+            ? 'bg-emerald-900/40 border-emerald-400/60 text-emerald-200'
+            : 'bg-teal-950/80 border-teal-800 text-teal-100'
+        }`;
+        btn.textContent = item.def;
+        btn.addEventListener('click', () => {
+          if (!state.c1SelectedTerm) {
+            showToast('Primero elegí un concepto de la columna izquierda.', false);
+            return;
+          }
+          if (state.c1SelectedTerm === item.id) {
+            playPickup();
+            state.c1Matched.push(item.id);
+            state.c1SelectedTerm = null;
+            renderStationChallenge1();
+          } else {
+            playError();
+            state.c1SelectedTerm = null;
+            showToast('Probá con otra definición para ese concepto.', false);
+            renderStationChallenge1();
+          }
+        });
+        defsEl.appendChild(btn);
+      });
+
+      document.getElementById('c1-claim').addEventListener('click', () => {
+        completeStation('tecnologias', 'Sello Tecnológico');
+      });
+    }
+
+    // CHALLENGE 2: Comunicación y cibercultura
+    const C2_QUESTIONS = [
+      {
+        prompt: 'Circula en el grupo de la escuela una cadena sin autor ni fecha sobre un supuesto cierre de bibliotecas. ¿Qué hace tu personaje?',
+        options: [
+          { text: 'Reenviarla rápido por las dudas para avisar a todos', ok: false },
+          { text: 'Verificar la fuente oficial, contrastar datos y comunicar con claridad a la comunidad', ok: true },
+          { text: 'Ignorar la consulta de los docentes y estudiantes', ok: false }
+        ]
+      },
+      {
+        prompt: 'Querés invitar a estudiantes y familias a una novedad del catálogo digital. ¿Cómo diseñás el mensaje?',
+        options: [
+          { text: 'Con lenguaje claro, cercano, enlaces directos y diseño accesible desde el celular', ok: true },
+          { text: 'En un párrafo largo de texto técnico sin espacios ni enlaces', ok: false },
+          { text: 'Solo pegando un código MARC 21 sin explicación', ok: false }
+        ]
+      }
+    ];
+
+    function renderStationChallenge2() {
+      const container = document.getElementById('dialog-station-body');
+      if (state.completedStations.includes('comunicacion')) {
+        state.c2Index = 0;
+      }
+      const q = C2_QUESTIONS[state.c2Index];
+
+      container.innerHTML = `
+        <p class="text-xs uppercase tracking-wider text-amber-300/90 font-semibold mb-2">
+          Situación ${state.c2Index + 1} de ${C2_QUESTIONS.length}
+        </p>
+        <p class="text-sm sm:text-base text-teal-100/95 leading-relaxed bg-teal-950/90 border border-teal-800 rounded-2xl p-4 mb-4">
+          ${q.prompt}
+        </p>
+        <div class="space-y-2.5" id="c2-options"></div>
+      `;
+
+      const optsEl = document.getElementById('c2-options');
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'option-btn w-full text-left p-3.5 rounded-xl border bg-teal-950/80 border-teal-800 text-sm text-amber-50';
+        btn.textContent = opt.text;
+        btn.addEventListener('click', () => {
+          if (opt.ok) {
+            if (state.c2Index < C2_QUESTIONS.length - 1) {
+              playPickup();
+              state.c2Index += 1;
+              showToast('¡Muy bien! Vamos con la segunda situación.', true);
+              renderStationChallenge2();
+            } else {
+              completeStation('comunicacion', 'Sello Digital');
+            }
+          } else {
+            playError();
+            showToast('Pensalo como mediador/a en cultura digital. ¡Intentá otra opción!', false);
+          }
+        });
+        optsEl.appendChild(btn);
+      });
+    }
+
+    // CHALLENGE 3: Formación de usuarios
+    const C3_STEPS = [
+      { step: 1, text: 'Definir qué información necesita el estudiante y con qué propósito' },
+      { step: 2, text: 'Elegir palabras clave y buscar en fuentes confiables o en el catálogo' },
+      { step: 3, text: 'Evaluar críticamente los hallazgos y citar las fuentes utilizadas' }
+    ];
+    const C3_DISPLAY = [C3_STEPS[1], C3_STEPS[2], C3_STEPS[0]];
+
+    function renderStationChallenge3() {
+      const container = document.getElementById('dialog-station-body');
+      const done = state.c3Picked.length === 3;
+
+      container.innerHTML = `
+        <p class="text-sm text-teal-100/85 mb-4">
+          Tocá en orden lógico (del <strong>1° al 3° paso</strong>) cómo acompañarías a un estudiante en su búsqueda:
+        </p>
+
+        <div class="space-y-2.5 mb-5" id="c3-list"></div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <button id="c3-reset" type="button" class="px-4 py-2.5 rounded-xl bg-teal-950 border border-teal-700 text-xs font-semibold text-teal-200 hover:border-amber-300/50">
+            ↺ Reiniciar orden
+          </button>
+          <button id="c3-claim" type="button" ${done ? '' : 'disabled'} class="btn-gold px-6 py-3 rounded-xl text-sm shadow-lg">
+            🗝️ Reclamar Sello de Autonomía →
+          </button>
+        </div>
+      `;
+
+      const listEl = document.getElementById('c3-list');
+      C3_DISPLAY.forEach(item => {
+        const orderIndex = state.c3Picked.indexOf(item.step);
+        const picked = orderIndex !== -1;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.disabled = picked;
+        btn.className = `option-btn w-full text-left p-3.5 rounded-xl border text-sm flex items-center justify-between gap-3 ${
+          picked
+            ? 'bg-emerald-900/40 border-emerald-400/60 text-emerald-100'
+            : 'bg-teal-950/80 border-teal-800 text-amber-50'
+        }`;
+        btn.innerHTML = `<span>${item.text}</span><span class="shrink-0 font-bold text-amber-300">${picked ? `Paso ${orderIndex + 1} ✅` : 'Elegir'}</span>`;
+        btn.addEventListener('click', () => {
+          const expected = state.c3Picked.length + 1;
+          if (item.step === expected) {
+            playPickup();
+            state.c3Picked.push(item.step);
+            renderStationChallenge3();
+          } else {
+            playError();
+            showToast(`Ese no es el paso ${expected}°. ¡Fijate qué hacemos primero!`, false);
+          }
+        });
+        listEl.appendChild(btn);
+      });
+
+      document.getElementById('c3-reset').addEventListener('click', () => {
+        playClick();
+        state.c3Picked = [];
+        renderStationChallenge3();
+      });
+
+      document.getElementById('c3-claim').addEventListener('click', () => {
+        completeStation('formacion', 'Sello de Autonomía');
+      });
+    }
+
+    // FINALE & CONFETTI
+    function showFinale() {
+      state.postGameUnlocked = true;
+      showScreen('screen-finale');
+      launchConfetti();
+
+      const ch = CHARACTERS.find(c => c.id === state.selectedCharId) || CHARACTERS[0];
+      document.getElementById('finale-avatar').src = ch.avatar;
+      document.getElementById('finale-student-line').textContent = state.studentName
+        ? `Estudiante: ${state.studentName} · Guardián elegido: ${ch.name}`
+        : `Guardián elegido: ${ch.name} · Carrera de Bibliotecario de Instituciones Educativas`;
+
+      const codexBadge = document.getElementById('finale-codex-badge');
+      if (state.starsCollected === 5) {
+        codexBadge.textContent = '🌟 Mención Especial: 5/5 Códices Dorados';
+      } else {
+        codexBadge.textContent = `📖 Códices Dorados recolectados: ${state.starsCollected}/5`;
+      }
+
+      fetch('/api/completar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          estudiante: state.studentName,
+          personaje: state.selectedCharId,
+          libros_magicos: state.starsCollected
+        })
+      }).catch(() => {});
+
+      const grid = document.getElementById('grades-grid');
+      grid.innerHTML = '';
+      SUBJECTS.forEach(sub => {
+        const card = document.createElement('div');
+        card.className = 'rounded-2xl p-5 bg-teal-950/85 border border-amber-400/45 flex flex-col items-center text-center shadow-lg';
+        card.innerHTML = `
+          <span class="text-xs font-semibold text-amber-300/90 mb-2">${sub.seal}</span>
+          <h3 class="font-serif-title text-base font-bold text-amber-50 mb-3 min-h-[3rem] flex items-center">${sub.name}</h3>
+          <div class="w-20 h-20 rounded-full bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-600 text-teal-950 flex flex-col items-center justify-center shadow-inner mb-2.5 border-2 border-amber-100">
+            <span class="text-3xl font-extrabold leading-none">${sub.grade}</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider">${sub.gradeText}</span>
+          </div>
+          <span class="inline-block px-3 py-0.5 rounded-full bg-emerald-400/15 border border-emerald-400/40 text-emerald-300 text-xs font-semibold">
+            Aprobada · Sobresaliente
+          </span>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    let confettiAnim = null;
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const colors = ['#f5c451', '#34d399', '#38bdf8', '#fb7185', '#fef08a'];
+      const particles = Array.from({ length: 130 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * -canvas.height,
+        w: 6 + Math.random() * 6,
+        h: 8 + Math.random() * 6,
+        vy: 2.2 + Math.random() * 3.2,
+        vx: (Math.random() - 0.5) * 2.2,
+        rot: Math.random() * Math.PI * 2,
+        vrot: (Math.random() - 0.5) * 0.14,
+        color: colors[Math.floor(Math.random() * colors.length)]
+      }));
+
+      let frames = 0;
+      cancelAnimationFrame(confettiAnim);
+      function tick() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vrot;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        frames++;
+        if (frames < 250) {
+          confettiAnim = requestAnimationFrame(tick);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      tick();
+    }
+
+    // Download Luxury High-Res Diploma PNG (1400 x 960)
+    function downloadDiploma() {
+      const ch = CHARACTERS.find(c => c.id === state.selectedCharId) || CHARACTERS[0];
+      const c = document.createElement('canvas');
+      c.width = 1400;
+      c.height = 960;
+      const ctx = c.getContext('2d');
+
+      const grad = ctx.createRadialGradient(700, 200, 100, 700, 480, 900);
+      grad.addColorStop(0, '#143338');
+      grad.addColorStop(0.6, '#0b1d21');
+      grad.addColorStop(1, '#061013');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1400, 960);
+
+      ctx.strokeStyle = '#e5b84b';
+      ctx.lineWidth = 8;
+      ctx.strokeRect(32, 32, 1336, 896);
+      ctx.strokeStyle = 'rgba(229, 184, 75, 0.45)';
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(48, 48, 1304, 864);
+
+      const corners = [[62, 62], [1338, 62], [62, 898], [1338, 898]];
+      corners.forEach(([cx, cy]) => {
+        ctx.fillStyle = '#e5b84b';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#f5c451';
+      ctx.font = 'bold 22px Inter, sans-serif';
+      ctx.fillText('INSTITUTO SUPERIOR FEB · BIBLIOTECARIO DE INSTITUCIONES EDUCATIVAS', 700, 105);
+
+      ctx.fillStyle = '#f8f5ee';
+      ctx.font = 'bold 52px Georgia, serif';
+      ctx.fillText('Diploma de Honor y Acta de Calificaciones', 700, 170);
+
+      const img = avatarImages[ch.id];
+      if (img && img.complete && img.naturalWidth > 0) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(210, 245, 52, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(img, 158, 193, 104, 104);
+        ctx.restore();
+
+        ctx.strokeStyle = '#f5c451';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(210, 245, 52, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = '#a7f3d0';
+      ctx.font = 'bold 28px Inter, sans-serif';
+      const studentLabel = state.studentName ? state.studentName : 'Estudiante Destacado/a';
+      ctx.fillText(`Otorgado a: ${studentLabel}`, 700, 232);
+
+      ctx.fillStyle = '#fde68a';
+      ctx.font = '20px Inter, sans-serif';
+      const honorExtra = state.starsCollected === 5
+        ? ` · Distinción Especial: 5/5 Códices Dorados`
+        : ` · Códices recolectados: ${state.starsCollected}/5`;
+      ctx.fillText(`Guardián de la Biblioteca: ${ch.name} (${ch.subtitle})${honorExtra}`, 700, 268);
+
+      const yStart = 345;
+      SUBJECTS.forEach((s, idx) => {
+        const y = yStart + idx * 102;
+        ctx.fillStyle = 'rgba(18, 45, 50, 0.92)';
+        ctx.fillRect(140, y - 45, 1120, 78);
+        ctx.strokeStyle = 'rgba(229, 184, 75, 0.55)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(140, y - 45, 1120, 78);
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#f8f5ee';
+        ctx.font = 'bold 26px Inter, sans-serif';
+        ctx.fillText(s.name, 175, y + 2);
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#6ee7b7';
+        ctx.font = 'bold 22px Inter, sans-serif';
+        ctx.fillText('APROBADA', 960, y + 2);
+
+        ctx.fillStyle = '#f5c451';
+        ctx.font = 'bold 30px Inter, sans-serif';
+        ctx.fillText(`Nota: ${s.grade} (${s.gradeText})`, 1225, y + 3);
+      });
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'italic 21px Georgia, serif';
+      ctx.fillText('«Por el compromiso, la creatividad y la vocación compartida durante todo el ciclo lectivo.', 700, 665);
+      ctx.fillText('¡Te deseamos el mayor de los éxitos como futuro/a colega bibliotecario/a!»', 700, 696);
+
+      const sigY = 805;
+      const colPositions = [235, 545, 855, 1165];
+      DOCENTES.forEach((doc, i) => {
+        const cx = colPositions[i];
+        ctx.strokeStyle = 'rgba(245, 196, 81, 0.6)';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(cx - 115, sigY - 26);
+        ctx.lineTo(cx + 115, sigY - 26);
+        ctx.stroke();
+
+        ctx.fillStyle = '#fef3c7';
+        ctx.font = 'bold 21px Georgia, serif';
+        ctx.fillText(doc.name, cx, sigY);
+
+        ctx.fillStyle = '#99f6e4';
+        ctx.font = '15px Inter, sans-serif';
+        ctx.fillText('Equipo Docente · Instituto FEB', cx, sigY + 24);
+      });
+
+      ctx.fillStyle = 'rgba(245, 196, 81, 0.75)';
+      ctx.font = 'bold 14px Inter, sans-serif';
+      ctx.fillText('ACTA FINAL VERIFICADA · LA BÚSQUEDA DEL SABER · CICLO LECTIVO', 700, 885);
+
+      const link = document.createElement('a');
+      const cleanName = state.studentName
+        ? state.studentName.toLowerCase().replace(/[^a-z0-9]+/g, '_')
+        : 'estudiante';
+      link.download = `diploma_honor_feb_${cleanName}.png`;
+      link.href = c.toDataURL('image/png');
+      link.click();
+      playSuccess();
+      showToast('📜 ¡Diploma de Honor descargado con éxito!', true);
+    }
+
+    function resetGame() {
+      playClick();
+      const dialog = document.getElementById('challenge-dialog');
+      if (dialog && dialog.open) dialog.close();
+
+      state.completedStations = [];
+      state.visitedClaustro = false;
+      state.postGameUnlocked = false;
+      state.discoveredEggs = [];
+      state.mateTurboActive = false;
+      state.violetLamps = false;
+      state.arcade.active = false;
+      state.arcade.books = [];
+      document.getElementById('arcade-banner').classList.add('hidden');
+      state.chestOpeningCinematic = false;
+      state.c1SelectedTerm = null;
+      state.c1Matched = [];
+      state.c2Index = 0;
+      state.c3Picked = [];
+      state.starsCollected = 0;
+      state.player.x = 480;
+      state.player.y = 525;
+      state.player.targetX = null;
+      state.player.targetY = null;
+      state.player.targetStation = null;
+      initCollectibles();
+      renderCharacters();
+      showScreen('screen-select');
+    }
+
+    // Setup Input Listeners (Keyboard, Canvas Click/Tap, D-Pad, Boost, Bookshelf & Lamp Easter Eggs)
+    function setupControls() {
+      window.addEventListener('keydown', (e) => {
+        const dialog = document.getElementById('challenge-dialog');
+        if (dialog && dialog.open) return;
+        if (document.getElementById('screen-world').classList.contains('hidden')) return;
+
+        const key = e.key.toLowerCase();
+        if (key === 'arrowup' || key === 'w') { state.keys.up = true; e.preventDefault(); }
+        if (key === 'arrowdown' || key === 's') { state.keys.down = true; e.preventDefault(); }
+        if (key === 'arrowleft' || key === 'a') { state.keys.left = true; e.preventDefault(); }
+        if (key === 'arrowright' || key === 'd') { state.keys.right = true; e.preventDefault(); }
+        if (key === 'shift') {
+          e.preventDefault();
+          triggerBoost();
+        }
+        if (key === ' ' || key === 'enter' || key === 'e') {
+          const nearby = getNearbyStation();
+          if (nearby) {
+            e.preventDefault();
+            interactWithStation(nearby);
+          }
+        }
+      });
+
+      window.addEventListener('keyup', (e) => {
+        const key = e.key.toLowerCase();
+        if (key === 'arrowup' || key === 'w') state.keys.up = false;
+        if (key === 'arrowdown' || key === 's') state.keys.down = false;
+        if (key === 'arrowleft' || key === 'a') state.keys.left = false;
+        if (key === 'arrowright' || key === 'd') state.keys.right = false;
+      });
+
+      const canvas = document.getElementById('game-canvas');
+      canvas.addEventListener('pointerdown', (e) => {
+        if (state.chestOpeningCinematic) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = WORLD_W / rect.width;
+        const scaleY = WORLD_H / rect.height;
+        const clickX = (e.clientX - rect.left) * scaleX;
+        const clickY = (e.clientY - rect.top) * scaleY;
+
+        // 1. Check if clicked on Dewey the Cat in Post-Game
+        if (state.postGameUnlocked && Math.hypot(clickX - state.cat.x, clickY - state.cat.y) <= 38) {
+          interactWithStation({ id: 'michi', x: state.cat.x, y: state.cat.y });
+          return;
+        }
+
+        // 2. Check if clicked on a Bookshelf or Reading Table Lamp (Easter Egg 4)
+        for (const ob of OBSTACLES) {
+          if (clickX >= ob.x && clickX <= ob.x + ob.w && clickY >= ob.y && clickY <= ob.y + ob.h) {
+            if (ob.type === 'shelf' && ob.secretQuote) {
+              playPickup();
+              registerEgg('estante');
+              spawnWorldParticles(clickX, clickY, '#fde047', 16);
+              addFloatingText(clickX, ob.y - 8, '📚 ¡Cita Secreta!', '#fde047');
+              showToast(ob.secretQuote, true);
+              return;
+            }
+            if (ob.type === 'table') {
+              playClick();
+              registerEgg('estante');
+              state.violetLamps = !state.violetLamps;
+              spawnWorldParticles(ob.x + ob.w / 2, ob.y + ob.h / 2, state.violetLamps ? '#e879f9' : '#34d399', 18);
+              showToast(
+                state.violetLamps
+                  ? '🔮 ¡Activaste las Lámparas Místicas de Lectura Nocturna!'
+                  : '🟢 Volviste a las clásicas Lámparas Esmeralda de Biblioteca.',
+                true
+              );
+              return;
+            }
+          }
+        }
+
+        // 3. Check if clicked on a Station
+        let clickedStation = null;
+        for (const st of getActiveStations()) {
+          if (Math.hypot(clickX - st.x, clickY - st.y) <= st.radius + 18) {
+            clickedStation = st;
+            break;
+          }
+        }
+
+        if (clickedStation) {
+          const distToPlayer = Math.hypot(state.player.x - clickedStation.x, state.player.y - clickedStation.y);
+          if (distToPlayer <= clickedStation.interactDist) {
+            interactWithStation(clickedStation);
+            return;
+          }
+          state.player.targetX = clickedStation.x;
+          state.player.targetY = clickedStation.y + clickedStation.radius + 12;
+          state.player.targetStation = clickedStation;
+        } else {
+          state.player.targetX = clickX;
+          state.player.targetY = clickY;
+          state.player.targetStation = null;
+        }
+      });
+
+      document.querySelectorAll('.dpad-btn').forEach(btn => {
+        const dir = btn.getAttribute('data-dir');
+        const startDir = (e) => {
+          e.preventDefault();
+          state.keys[dir] = true;
+        };
+        const endDir = (e) => {
+          e.preventDefault();
+          state.keys[dir] = false;
+        };
+        btn.addEventListener('pointerdown', startDir);
+        btn.addEventListener('pointerup', endDir);
+        btn.addEventListener('pointerleave', endDir);
+        btn.addEventListener('pointercancel', endDir);
+      });
+
+      document.getElementById('mobile-action-btn').addEventListener('click', () => {
+        const nearby = getNearbyStation();
+        if (nearby) {
+          interactWithStation(nearby);
+        } else {
+          showToast('Acercate a una estación brillante, a Dewey 🐱, al Rincón del Mate 🧉 o tocá un estante.', false);
+        }
+      });
+
+      document.getElementById('mobile-boost-btn').addEventListener('click', () => {
+        triggerBoost();
+      });
+
+      document.getElementById('interact-btn').addEventListener('click', () => {
+        const nearby = getNearbyStation();
+        if (nearby) interactWithStation(nearby);
+      });
+    }
+
+    // Init
+    window.addEventListener('load', () => {
+      initCollectibles();
+      initFireflies();
+      renderCharacters();
+      setupControls();
+      showScreen('screen-select');
+
+      document.getElementById('start-btn').addEventListener('click', () => {
+        if (!state.selectedCharId) return;
+        playSuccess();
+        startAmbientMusic();
+        state.studentName = document.getElementById('student-name').value.trim();
+        state.player.x = 480;
+        state.player.y = 525;
+        updateWorldHud();
+        showScreen('screen-world');
+        if (!worldLoopId) {
+          gameLoop();
+        }
+        showToast('✨ ¡Bienvenido/a a la Gran Biblioteca FEB! Visitá las estaciones y el Claustro Docente.', true);
+      });
+
+      document.getElementById('dialog-close-btn').addEventListener('click', () => {
+        playClick();
+        document.getElementById('challenge-dialog').close();
+      });
+
+      document.getElementById('music-toggle').addEventListener('click', () => {
+        state.musicEnabled = !state.musicEnabled;
+        document.getElementById('music-icon').textContent = state.musicEnabled ? '🎵' : '🔕';
+        document.getElementById('music-label').textContent = state.musicEnabled ? 'Música' : 'Sin música';
+        if (state.musicEnabled) {
+          startAmbientMusic();
+          playClick();
+        }
+      });
+
+      document.getElementById('sound-toggle').addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        document.getElementById('sound-icon').textContent = state.soundEnabled ? '🔊' : '🔇';
+        document.getElementById('sound-label').textContent = state.soundEnabled ? 'Efectos' : 'Silencio';
+        if (state.soundEnabled) playClick();
+      });
+
+      document.getElementById('view-grades-top').addEventListener('click', () => {
+        playClick();
+        showFinale();
+      });
+
+      document.getElementById('restart-top').addEventListener('click', resetGame);
+      document.getElementById('play-again-btn').addEventListener('click', resetGame);
+      document.getElementById('back-to-map-btn').addEventListener('click', () => {
+        playSuccess();
+        updateWorldHud();
+        showScreen('screen-world');
+        showToast('🕵️ ¡Easter Eggs Activados! Conocé a Dewey 🐱, pasá por el Rincón del Mate 🧉, tocá los estantes o jugá al Arcade 🕹️.', true);
+      });
+      document.getElementById('download-diploma-btn').addEventListener('click', downloadDiploma);
+    });
+  </script>
+</body>
+</html>
